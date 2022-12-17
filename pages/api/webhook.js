@@ -38,25 +38,20 @@ export default async (NextApiRequest, NextApiResponse) => {
            // const query = NextApiRequest.query;
             // const { mode='hub.mode', token='hub.verify_token',challenge='hub.challenge'} = query;
             const {
-                query: {mode='hub.mode',token='hub.verify_token',challenge='hub.challenge' },
+                query: {kmode='hub.mode',ktoken='hub.verify_token',kchallenge='hub.challenge' },
                 method,
               } = NextApiRequest;
 
-                // console.log(NextApiRequest.query)
-                // console.log(NextApiRequest.query['hub.mode'])
-                // console.log(NextApiRequest.query['hub.verify_token'])
-                // console.log(NextApiRequest.query['hub.challenge'])
-            let mode1 = NextApiRequest.query['hub.mode'];
-            let token1 = NextApiRequest.query['hub.verify_token'];
-            let challenge1 = NextApiRequest.query['hub.challenge'];
-            console.log({query:token});
+            let mode = NextApiRequest.query['hub.mode'];
+            let token = NextApiRequest.query['hub.verify_token'];
+            let challenge = NextApiRequest.query['hub.challenge'];
             // Check if a token and mode were sent
-             if (mode1 && token1) {
+             if (mode && token) {
                 // Check the mode and token sent are correct
-                if (mode1 === 'subscribe' && token1 === verify_token) {
+                if (mode === 'subscribe' && token === verify_token) {
                     // Respond with 200 OK and challenge token from the request
                     console.log('WEBHOOK_VERIFIED');
-            return         NextApiResponse.status(200).send(challenge1);
+            return         NextApiResponse.status(200).send(challenge);
                 } else {
                     // Responds with '403 Forbidden' if verify tokens do not match
                     NextApiResponse.status(403);
@@ -69,7 +64,8 @@ export default async (NextApiRequest, NextApiResponse) => {
 
             // Check the Incoming webhook message
             console.log(JSON.stringify(NextApiRequest.body, null, 2));
-
+            console.log(JSON.stringify(NextApiRequest));
+               
             // info on WhatsApp text message payload: https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-examples#text-messages
             if (NextApiRequest.body.object) {
                 if (NextApiRequest.body.entry && NextApiRequest.body.entry[0].changes && NextApiRequest.body.entry[0].changes[0] && NextApiRequest.body.entry[0].changes[0].value.messages && NextApiRequest.body.entry[0].changes[0].value.messages[0]) {

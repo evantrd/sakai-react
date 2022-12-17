@@ -18,8 +18,8 @@ const token = process.env.WHATSAPP_TOKEN;
 // import express from "express";
 import { NextApiRequest, NextApiResponse } from 'next';
 // import body_Parser from "body-parser";
- import axios from "axios";
- import config from "./config.js";
+import axios from 'axios';
+import config from './config.js';
 // import cors from 'cors'
 // import Promise from "bluebird";
 import { PrismaClient } from '@prisma/client';
@@ -27,34 +27,34 @@ import morgan from 'morgan';
 const prisma = new PrismaClient();
 
 export default async (NextApiRequest, NextApiResponse) => {
-    
     const { method } = NextApiRequest;
-   
-    switch (method) {
+
+    switch (NextApiRequest.method) {
         case 'GET':
             const verify_token = process.env.VERIFY_TOKEN;
-               // Parse params from the webhook verification request
-           // const query = NextApiRequest.query;
+            // Parse params from the webhook verification request
+            // const query = NextApiRequest.query;
             // const { mode='hub.mode', token='hub.verify_token',challenge='hub.challenge'} = query;
             const {
-                query: {kmode='hub.mode',ktoken='hub.verify_token',kchallenge='hub.challenge' },
-                method,
-              } = NextApiRequest;
+                query: { kmode = 'hub.mode', ktoken = 'hub.verify_token', kchallenge = 'hub.challenge' },
+                method
+            } = NextApiRequest;
 
             let mode = NextApiRequest.query['hub.mode'];
             let token = NextApiRequest.query['hub.verify_token'];
             let challenge = NextApiRequest.query['hub.challenge'];
             // Check if a token and mode were sent
-             if (mode && token) {
+            if (mode && token) {
                 // Check the mode and token sent are correct
                 if (mode === 'subscribe' && token === verify_token) {
                     // Respond with 200 OK and challenge token from the request
                     console.log('WEBHOOK_VERIFIED');
-            return         NextApiResponse.status(200).send(challenge);
+                    return NextApiResponse.status(200).send(challenge);
                 } else {
                     // Responds with '403 Forbidden' if verify tokens do not match
-                    NextApiResponse.status(403);
                     console.log('WEBHOOK_FAILS');
+                    return NextApiResponse.status(403).send('WEBHOOK_FAILS');
+                    
                 }
             }
         case 'POST':
@@ -66,7 +66,7 @@ export default async (NextApiRequest, NextApiResponse) => {
             console.log(NextApiRequest.body);
             console.log(NextApiRequest.method);
 
-            return NextApiResponse.status(200).json('ESPERANDO RESPUESTA'); 
+
             // info on WhatsApp text message payload: https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-examples#text-messages
             if (NextApiRequest.body.object) {
                 if (NextApiRequest.body.entry && NextApiRequest.body.entry[0].changes && NextApiRequest.body.entry[0].changes[0] && NextApiRequest.body.entry[0].changes[0].value.messages && NextApiRequest.body.entry[0].changes[0].value.messages[0]) {
@@ -185,7 +185,7 @@ export default async (NextApiRequest, NextApiResponse) => {
             } else {
                 // Return a '404 Not Found' if event is not from a WhatsApp API
                 console.log('no impresion de mensajes');
-                return    NextApiResponse.status(404);
+                return NextApiResponse.status(404);
             }
         default:
             return NextApiResponse.status(400).json('fallo');

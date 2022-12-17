@@ -64,7 +64,10 @@ export default async (NextApiRequest, NextApiResponse) => {
 
             // Check the Incoming webhook message
             console.log(JSON.stringify(NextApiRequest.body, null, 2));
-            console.log(NextApiRequest);
+            console.log(NextApiRequest.body);
+            console.log(NextApiRequest.host);
+            console.log(NextApiRequest.method);
+
                
             // info on WhatsApp text message payload: https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-examples#text-messages
             if (NextApiRequest.body.object) {

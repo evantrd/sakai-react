@@ -32,32 +32,6 @@ export default async (NextApiRequest, NextApiResponse) => {
     const { method } = NextApiRequest;
    
     switch (method) {
-        case 'GET':
-            const verify_token = process.env.VERIFY_TOKEN;
-               // Parse params from the webhook verification request
-           // const query = NextApiRequest.query;
-            // const { mode='hub.mode', token='hub.verify_token',challenge='hub.challenge'} = query;
-            const {
-                query: {kmode='hub.mode',ktoken='hub.verify_token',kchallenge='hub.challenge' },
-                method,
-              } = NextApiRequest;
-
-            let mode = NextApiRequest.query['hub.mode'];
-            let token = NextApiRequest.query['hub.verify_token'];
-            let challenge = NextApiRequest.query['hub.challenge'];
-            // Check if a token and mode were sent
-             if (mode && token) {
-                // Check the mode and token sent are correct
-                if (mode === 'subscribe' && token === verify_token) {
-                    // Respond with 200 OK and challenge token from the request
-                    console.log('WEBHOOK_VERIFIED');
-            return         NextApiResponse.status(200).send(challenge);
-                } else {
-                    // Responds with '403 Forbidden' if verify tokens do not match
-                    NextApiResponse.status(403);
-                    console.log('WEBHOOK_FAILS');
-                }
-            }
         case 'POST':
             // Parse the request body from the POST
             let body = NextApiRequest.body;
@@ -65,7 +39,6 @@ export default async (NextApiRequest, NextApiResponse) => {
             // Check the Incoming webhook message
             console.log(JSON.stringify(NextApiRequest.body, null, 2));
             console.log(NextApiRequest.body);
-            console.log(NextApiRequest.host);
             console.log(NextApiRequest.method);
 
                
@@ -188,6 +161,32 @@ export default async (NextApiRequest, NextApiResponse) => {
                 // Return a '404 Not Found' if event is not from a WhatsApp API
                 console.log('no impresion de mensajes');
                 return    NextApiResponse.send(404);
+            }
+            case 'GET':
+            const verify_token = process.env.VERIFY_TOKEN;
+               // Parse params from the webhook verification request
+           // const query = NextApiRequest.query;
+            // const { mode='hub.mode', token='hub.verify_token',challenge='hub.challenge'} = query;
+            const {
+                query: {kmode='hub.mode',ktoken='hub.verify_token',kchallenge='hub.challenge' },
+                method,
+              } = NextApiRequest;
+
+            let mode = NextApiRequest.query['hub.mode'];
+            let token = NextApiRequest.query['hub.verify_token'];
+            let challenge = NextApiRequest.query['hub.challenge'];
+            // Check if a token and mode were sent
+             if (mode && token) {
+                // Check the mode and token sent are correct
+                if (mode === 'subscribe' && token === verify_token) {
+                    // Respond with 200 OK and challenge token from the request
+                    console.log('WEBHOOK_VERIFIED');
+            return         NextApiResponse.status(200).send(challenge);
+                } else {
+                    // Responds with '403 Forbidden' if verify tokens do not match
+                    NextApiResponse.status(403);
+                    console.log('WEBHOOK_FAILS');
+                }
             }
         default:
             return NextApiResponse.status(400).json('fallo');

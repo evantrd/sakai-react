@@ -48,8 +48,9 @@ export default async (NextApiRequest, NextApiResponse) => {
                     console.log('WEBHOOK_VERIFIED');
                     NextApiResponse.status(200).send(challenge);
                 } else {
-            //         // Responds with '403 Forbidden' if verify tokens do not match
+                    // Responds with '403 Forbidden' if verify tokens do not match
                     NextApiResponse.status(403);
+                    console.log('WEBHOOK_FAILS');
                 }
             }
         case 'POST':

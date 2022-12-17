@@ -36,9 +36,12 @@ export default async (NextApiRequest, NextApiResponse) => {
             const verify_token = process.env.VERIFY_TOKEN;
 
             // Parse params from the webhook verification request
-            let mode = NextApiRequest.query['hub.mode'];
-            let token = NextApiRequest.query['hub.verify_token'];
-            let challenge = NextApiRequest.query['hub.challenge'];
+            const query = NextApiRequest.query;
+            const { mode='hub.mode', token='hub.verify_token',challenge='hub.challenge'} = query;
+
+            // let mode = NextApiRequest.query['hub.mode'];
+            // let token = NextApiRequest.query['hub.verify_token'];
+            // let challenge = NextApiRequest.query['hub.challenge'];
 
             // Check if a token and mode were sent
             if (mode && token) {

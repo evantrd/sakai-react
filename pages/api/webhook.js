@@ -41,12 +41,13 @@ export default async  function handler(req, res)  {
             },
             response => {
               response.pipe(res);
+              console.log(JSON.stringify(NextApiRequest.body, null, 2));
               resolve()
             },
           );
 
           request.write(JSON.stringify(req.body));
-          console.log(req.body)
+        
           request.end();
         } catch (error) {
           //Log.error(error); // Can be a simple console.error too

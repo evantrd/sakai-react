@@ -33,7 +33,7 @@ export default async  function handler(req, res)  {
       }
       case "POST": {
         try {
-          const request = http.request( // Node core http module
+            const request = http.request( // Node core http module
             url,
             {
               headers:   makeHeaders(req, res),
@@ -41,17 +41,19 @@ export default async  function handler(req, res)  {
             },
             response => {
               response.pipe(res);
-              console.log(JSON.stringify(NextApiRequest.body, null, 2));
               resolve()
+              console.log(JSON.stringify(req.body, null, 2));
             },
+            
           );
 
           request.write(JSON.stringify(req.body));
-        
+          console.log(JSON.stringify(req.body, null, 2));
           request.end();
         } catch (error) {
           //Log.error(error); // Can be a simple console.error too
           res.status(500).end();
+          console.log('fallo error 500')
           return resolve()
         }
       }
@@ -61,6 +63,7 @@ export default async  function handler(req, res)  {
     
     
     res.status(405).end();
+    console.log('fallo error 405')
     
     return resolve()
     

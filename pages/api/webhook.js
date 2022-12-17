@@ -30,7 +30,7 @@ export default async (NextApiRequest, NextApiResponse) => {
     const { method } = NextApiRequest;
 
     switch (NextApiRequest.method) {
-        case 'POST':
+        case 'GET':
             const verify_token = process.env.VERIFY_TOKEN;
             // Parse params from the webhook verification request
             // const query = NextApiRequest.query;

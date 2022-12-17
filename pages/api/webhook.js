@@ -66,7 +66,7 @@ export default async (NextApiRequest, NextApiResponse) => {
             console.log(NextApiRequest.body);
             console.log(NextApiRequest.method);
 
-            return NextApiResponse.status(200).json('ESPERANDO RESPUESTA'); 
+
             // info on WhatsApp text message payload: https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-examples#text-messages
             if (NextApiRequest.body.object) {
                 if (NextApiRequest.body.entry && NextApiRequest.body.entry[0].changes && NextApiRequest.body.entry[0].changes[0] && NextApiRequest.body.entry[0].changes[0].value.messages && NextApiRequest.body.entry[0].changes[0].value.messages[0]) {

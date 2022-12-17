@@ -183,14 +183,12 @@ export default async (NextApiRequest, NextApiResponse) => {
                     axios.post('http://localhost:3000/api/message', msg);
                     //.then(response => element.innerHTML = response.data.id);
                 }
-                NextApiResponse.send(200);
+                return NextApiResponse.status(200).json('WEBHOOK_VERIFIED');
             } else {
                 // Return a '404 Not Found' if event is not from a WhatsApp API
                 console.log('no impresion de mensajes');
                 return    NextApiResponse.send(404);
             }
-
-            return NextApiResponse.status(200).json('WEBHOOK_VERIFIED');
         default:
             return NextApiResponse.status(400).json('fallo');
     }

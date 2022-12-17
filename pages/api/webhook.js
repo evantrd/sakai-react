@@ -42,23 +42,21 @@ export default async (NextApiRequest, NextApiResponse) => {
                 method,
               } = NextApiRequest;
 
-                console.log(NextApiRequest.query)
-                console.log(NextApiRequest.query['hub.mode'])
-                console.log(NextApiRequest.query['hub.verify_token'])
-                console.log(NextApiRequest.query['hub.challenge'])
-
-              console.log(mode,token,challenge, method);
-            // let mode = NextApiRequest.query['hub.mode'];
-            // let token = NextApiRequest.query['hub.verify_token'];
-            // let challenge = NextApiRequest.query['hub.challenge'];
+                // console.log(NextApiRequest.query)
+                // console.log(NextApiRequest.query['hub.mode'])
+                // console.log(NextApiRequest.query['hub.verify_token'])
+                // console.log(NextApiRequest.query['hub.challenge'])
+            let mode1 = NextApiRequest.query['hub.mode'];
+            let token1 = NextApiRequest.query['hub.verify_token'];
+            let challenge1 = NextApiRequest.query['hub.challenge'];
             console.log({query:token});
             // Check if a token and mode were sent
-             if (mode && token) {
+             if (mode1 && token1) {
                 // Check the mode and token sent are correct
-                if (mode === 'subscribe' && token === verify_token) {
+                if (mode1 === 'subscribe' && token1 === verify_token) {
                     // Respond with 200 OK and challenge token from the request
                     console.log('WEBHOOK_VERIFIED');
-            return         NextApiResponse.status(200).send(challenge);
+            return         NextApiResponse.status(200).send(challenge1);
                 } else {
                     // Responds with '403 Forbidden' if verify tokens do not match
                     NextApiResponse.status(403);

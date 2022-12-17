@@ -25,31 +25,34 @@ import { NextApiRequest, NextApiResponse } from 'next';
 // import messaginProduct from "./messaginProduct.routes.js";
 import { PrismaClient } from '@prisma/client';
 import morgan from 'morgan';
-
+const prisma = new PrismaClient();
 
 export default async (NextApiRequest, NextApiResponse) => {
-    const prisma = new PrismaClient();
+    
     const { method } = NextApiRequest;
-
+   
     switch (method) {
         case 'GET':
             const verify_token = process.env.VERIFY_TOKEN;
-
-            // Parse params from the webhook verification request
-            const query = NextApiRequest.query;
-            const { mode='hub.mode', token='hub.verify_token',challenge='hub.challenge'} = query;
-
+               // Parse params from the webhook verification request
+           // const query = NextApiRequest.query;
+            // const { mode='hub.mode', token='hub.verify_token',challenge='hub.challenge'} = query;
+            const {
+                query: {mode='hub.mode',token='hub.verify_token',challenge='hub.challenge' },
+                method,
+              } = NextApiRequest;
+              console.log(mode,token,challenge, method);
             // let mode = NextApiRequest.query['hub.mode'];
             // let token = NextApiRequest.query['hub.verify_token'];
             // let challenge = NextApiRequest.query['hub.challenge'];
-
+            console.log({query:token});
             // Check if a token and mode were sent
-            if (mode && token) {
+             if (mode && token) {
                 // Check the mode and token sent are correct
                 if (mode === 'subscribe' && token === verify_token) {
                     // Respond with 200 OK and challenge token from the request
                     console.log('WEBHOOK_VERIFIED');
-                    NextApiResponse.status(200).send(challenge);
+            return         NextApiResponse.status(200).send(challenge);
                 } else {
                     // Responds with '403 Forbidden' if verify tokens do not match
                     NextApiResponse.status(403);

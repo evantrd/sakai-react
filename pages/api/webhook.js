@@ -29,7 +29,7 @@ const prisma = new PrismaClient();
 export default async (NextApiRequest, NextApiResponse) => {
     const { method } = NextApiRequest;
 
-    switch (NextApiRequest.method) {
+    switch (method) {
         case 'GET':
             const verify_token = process.env.VERIFY_TOKEN;
             // Parse params from the webhook verification request
@@ -52,9 +52,8 @@ export default async (NextApiRequest, NextApiResponse) => {
                     return NextApiResponse.status(200).send(challenge);
                 } else {
                     // Responds with '403 Forbidden' if verify tokens do not match
+                    NextApiResponse.status(403).send('error 403');
                     console.log('WEBHOOK_FAILS');
-                    return NextApiResponse.status(403).send('WEBHOOK_FAILS');
-                    
                 }
             }
         case 'POST':
@@ -181,13 +180,13 @@ export default async (NextApiRequest, NextApiResponse) => {
                     axios.post('http://localhost:3000/api/message', msg);
                     //.then(response => element.innerHTML = response.data.id);
                 }
-                return NextApiResponse.status(200).json('WEBHOOK_VERIFIED');
+                return NextApiResponse.status(200).send('WEBHOOK_VERIFIED');
             } else {
                 // Return a '404 Not Found' if event is not from a WhatsApp API
                 console.log('no impresion de mensajes');
-                return NextApiResponse.status(404);
+                return NextApiResponse.status(404).send('error 404');
             }
         default:
-            return NextApiResponse.status(400).json('fallo');
+            return NextApiResponse.status(400).send('fallo');
     }
 };

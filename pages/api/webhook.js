@@ -28,7 +28,7 @@ const prisma = new PrismaClient();
 
 export default async (NextApiRequest, NextApiResponse) => {
     
-    const { method } = NextApiRequest.method;
+    const { method } = NextApiRequest;
    
     switch (method) {
         case 'GET':
@@ -59,14 +59,14 @@ export default async (NextApiRequest, NextApiResponse) => {
             }
         case 'POST':
             // Parse the request body from the POST
-            // let body = NextApiRequest.body;
+            let body = NextApiRequest.body;
 
             // Check the Incoming webhook message
-            
-           // console.log(NextApiRequest.body);
-            console.log(NextApiRequest.method);
             console.log(JSON.stringify(NextApiRequest.body, null, 2));
+            console.log(NextApiRequest.body);
+            console.log(NextApiRequest.method);
 
+            return NextApiResponse.status(200).json('ESPERANDO RESPUESTA'); 
             // info on WhatsApp text message payload: https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-examples#text-messages
             if (NextApiRequest.body.object) {
                 if (NextApiRequest.body.entry && NextApiRequest.body.entry[0].changes && NextApiRequest.body.entry[0].changes[0] && NextApiRequest.body.entry[0].changes[0].value.messages && NextApiRequest.body.entry[0].changes[0].value.messages[0]) {

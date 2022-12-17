@@ -43,9 +43,9 @@ export default async (NextApiRequest, NextApiResponse) => {
               } = NextApiRequest;
 
                 console.log(NextApiRequest.query)
-                console.log(mode)
-                console.log(token)
-                console.log(challenge)
+                console.log(NextApiRequest.query['hub.mode'])
+                console.log(NextApiRequest.query['hub.verify_token'])
+                console.log(NextApiRequest.query['hub.challenge'])
 
               console.log(mode,token,challenge, method);
             // let mode = NextApiRequest.query['hub.mode'];

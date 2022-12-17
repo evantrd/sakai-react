@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model messaging_audio {
+  id         Int     @id(map: "messaging_audio_pk") @default(autoincrement())
+  wamid      String? @db.VarChar
+  audio_type String? @db.VarChar
+  audio_id   String? @db.VarChar
+}
+
+model messaging_image {
+  id            Int     @id(map: "messaging_image_pk") @default(autoincrement())
+  wamid         String? @db.VarChar
+  image_type    String? @db.VarChar
+  image_sha256  String? @db.VarChar
+  image_id      String? @db.VarChar
+  image_caption String? @db.VarChar
+
+  @@unique([wamid, image_sha256], map: "messaging_image_uk")
+}
+
+model messaging_product {
+  id            Int      @id(map: "messaging_product_pk") @default(autoincrement())
+  phone_id      String   @db.VarChar
+  company_id    String?  @db.VarChar
+  msg_type      String   @db.VarChar
+  wamid         String   @db.VarChar
+  wam_id_parent String?  @db.VarChar
+  contact_id    String?  @db.VarChar
+  receipt_phone String   @db.VarChar
+  msg_text      String?  @db.VarChar
+  template_id   String?  @db.VarChar
+  msg_status    String   @db.VarChar
+  msg_stamp     DateTime? @db.Timestamp(6)
+  stamp         DateTime? @db.Timestamp(6)
+
+  @@unique([phone_id, company_id, wamid, wam_id_parent], map: "messaging_product_un")
+}

@@ -10,13 +10,13 @@ const AppMenu = () => {
     const contextPath = getConfig().publicRuntimeConfig.contextPath;
     const model = [
         {
-            label: 'Home',
-            items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' }]
+            label: 'Inicio',
+            items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/dasboard' }]
         },
         {
-            label: 'UI Components',
+            label: 'Entrada de Datos',
             items: [
-                { label: 'Form Layout', icon: 'pi pi-fw pi-id-card', to: '/uikit/formlayout' },
+                { label: 'Cliente', icon: 'pi pi-fw pi-id-card', to: '/uikit/formlayout' },
                 { label: 'Input', icon: 'pi pi-fw pi-check-square', to: '/uikit/input' },
                 { label: 'Float Label', icon: 'pi pi-fw pi-bookmark', to: '/uikit/floatlabel' },
                 { label: 'Invalid State', icon: 'pi pi-fw pi-exclamation-circle', to: '/uikit/invalidstate' },
@@ -35,7 +35,7 @@ const AppMenu = () => {
             ]
         },
         {
-            label: 'Prime Blocks',
+            label: 'Consultas',
             items: [
                 { label: 'Free Blocks', icon: 'pi pi-fw pi-eye', to: '/blocks', badge: 'NEW' },
                 { label: 'All Blocks', icon: 'pi pi-fw pi-globe', url: 'https://www.primefaces.org/primeblocks-react', target: '_blank' }

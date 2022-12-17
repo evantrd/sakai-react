@@ -1,3 +1,4 @@
+import axios from 'axios';
 import getConfig from 'next/config';
 import Link from 'next/link';
 import Router, { useRouter } from 'next/router';
@@ -9,8 +10,18 @@ const AppTopbar = forwardRef((props, ref) => {
     const { layoutConfig, layoutState, onMenuToggle, showProfileSidebar } = useContext(LayoutContext);
     const menubuttonRef = useRef(null);
     const topbarmenuRef = useRef(null);
+    const router = useRouter();
     const topbarmenubuttonRef = useRef(null);
     const contextPath = getConfig().publicRuntimeConfig.contextPath;
+
+
+    const logout= async (e)=>{ 
+        e.preventDefault();
+        router.push('/auth/login');
+    const response =  await axios.post('/api/auth/logout')        
+    console.log(response)
+    };
+
 
     useImperativeHandle(ref, () => ({
         menubutton: menubuttonRef.current,
@@ -44,12 +55,12 @@ const AppTopbar = forwardRef((props, ref) => {
                 </button>
                 <button type="button" className="p-link layout-topbar-button">
                     <i className="pi pi-user"></i>
-                    <span>Profile</span>
+                    <span>Perfil</span>
                 </button>
-                <Link href="/documentation">
-                    <button type="button" className="p-link layout-topbar-button">
-                        <i className="pi pi-cog"></i>
-                        <span>Settings</span>
+                <Link  href="/auth/login" >
+                    <button onClick={logout} type="button" className="p-link layout-topbar-button">
+                        <i className="pi pi-power-off"></i>
+                        <span>Salir</span>
                     </button>
                 </Link>
             </div>

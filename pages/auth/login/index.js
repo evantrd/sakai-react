@@ -8,14 +8,29 @@ import { Password } from 'primereact/password';
 import { LayoutContext } from '../../../layout/context/layoutcontext';
 import { InputText } from 'primereact/inputtext';
 import { classNames } from 'primereact/utils';
+import axios from "axios";
 
 const LoginPage = () => {
     const [password, setPassword] = useState('');
+    const [email, setEmail] = useState('');
     const [checked, setChecked] = useState(false);
     const { layoutConfig } = useContext(LayoutContext);
     const contextPath = getConfig().publicRuntimeConfig.contextPath;
     const router = useRouter();
     const containerClassName = classNames('surface-ground flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden', {'p-input-filled': layoutConfig.inputStyle === 'filled'});
+
+
+
+ const handleSubmit= async (e)=>{ 
+        e.preventDefault();
+        router.push('/')
+        console.log({password,email});
+const response =  await axios.post('/api/auth/login',{email,password})        
+console.log(response)
+};
+
+
+
 
     return (
         <div className={containerClassName}>
@@ -33,7 +48,7 @@ const LoginPage = () => {
                             <label htmlFor="email1" className="block text-900 text-xl font-medium mb-2">
                                 Email
                             </label>
-                            <InputText inputid="email1" type="text" placeholder="Email address" className="w-full md:w-30rem mb-5" style={{ padding: '1rem' }} />
+                            <InputText inputid="email1" type="text" placeholder="Email address" className="w-full md:w-30rem mb-5" style={{ padding: '1rem' }} onChange={(e) => setEmail(e.target.value)} />
 
                             <label htmlFor="password1" className="block text-900 font-medium text-xl mb-2">
                                 Password
@@ -51,7 +66,10 @@ const LoginPage = () => {
                                     Forgot password?
                                 </a>
                             </div>
-                            <Button label="Sign In" className="w-full p-3 text-xl" onClick={() => router.push('/')}></Button>
+                            <Button onClick={handleSubmit} label="Sign In" className="w-full p-3 text-xl"
+                            // onClick={() => router.push('/')}
+                             ></Button>
+                            
                         </div>
                     </div>
                 </div>

@@ -8,6 +8,8 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import { ProductService } from '../demo/service/ProductService';
 import { LayoutContext } from '../layout/context/layoutcontext';
 import Link from 'next/link';
+import axios from 'axios';
+//import apiMessage from '../pages/api/message/app'
 const lineData = {
     labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
     datasets: [
@@ -30,6 +32,10 @@ const lineData = {
     ]
 };
 
+
+
+//apiMessage()
+
 const Dashboard = () => {
     const [products, setProducts] = useState(null);
     const menu1 = useRef(null);
@@ -37,6 +43,12 @@ const Dashboard = () => {
     const [lineOptions, setLineOptions] = useState(null);
     const { layoutConfig } = useContext(LayoutContext);
     const contextPath = getConfig().publicRuntimeConfig.contextPath;
+
+    const getProfile= async (e)=>{ 
+        e.preventDefault();
+    const response =  await axios.post('/api/auth/profile')        
+    console.log(response)
+    };
 
     const applyLightTheme = () => {
         const lineOptions = {
@@ -372,11 +384,12 @@ const Dashboard = () => {
                         <div className="text-white font-medium text-5xl">Try PrimeBlocks</div>
                     </div>
                     <div className="mt-4 mr-auto md:mt-0 md:mr-0">
-                        <Link href="https://www.primefaces.org/primeblocks-react">
+                        <Button href="https://www.primefaces.org/primeblocks-react"
+                        onClick={getProfile}>
                             <a className="p-button font-bold px-5 py-3 p-button-warning p-button-rounded p-button-raised">
                                 Get Started
                             </a>
-                        </Link>
+                        </Button>
                     </div>
                 </div>
             </div>

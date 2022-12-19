@@ -11,48 +11,35 @@ const AppMenu = () => {
     const model = [
         {
             label: 'Inicio',
-            items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/dasboard' }]
+            items: [{ label: 'Tablero', icon: 'pi pi-fw pi-home', to: '/dasboard' }]
         },
         {
             label: 'Entrada de Datos',
+            items: [    { label: 'Enviar Mensajes', icon: 'pi pi-fw pi-id-card', to: '/chat' },
+                        { label: 'Clientes', icon: 'pi pi-fw pi-id-card', to: '/customer' },       
+                        { label: 'Servicios', icon: 'pi pi-fw pi-id-card', to: '/services' },
+                        { label: 'Ofertas', icon: 'pi pi-fw pi-id-card', to: '/offer' }]
+        },
+        {
+            label: 'Informes',
             items: [
-                { label: 'Cliente', icon: 'pi pi-fw pi-id-card', to: '/uikit/formlayout' },
-                { label: 'Input', icon: 'pi pi-fw pi-check-square', to: '/uikit/input' },
-                { label: 'Float Label', icon: 'pi pi-fw pi-bookmark', to: '/uikit/floatlabel' },
-                { label: 'Invalid State', icon: 'pi pi-fw pi-exclamation-circle', to: '/uikit/invalidstate' },
-                { label: 'Button', icon: 'pi pi-fw pi-mobile', to: '/uikit/button', class: 'rotated-icon' },
-                { label: 'Table', icon: 'pi pi-fw pi-table', to: '/uikit/table' },
-                { label: 'List', icon: 'pi pi-fw pi-list', to: '/uikit/list' },
-                { label: 'Tree', icon: 'pi pi-fw pi-share-alt', to: '/uikit/tree' },
-                { label: 'Panel', icon: 'pi pi-fw pi-tablet', to: '/uikit/panel' },
-                { label: 'Overlay', icon: 'pi pi-fw pi-clone', to: '/uikit/overlay' },
-                { label: 'Media', icon: 'pi pi-fw pi-image', to: '/uikit/media' },
-                { label: 'Menu', icon: 'pi pi-fw pi-bars', to: '/uikit/menu', preventExact: true },
-                { label: 'Message', icon: 'pi pi-fw pi-comment', to: '/uikit/message' },
-                { label: 'File', icon: 'pi pi-fw pi-file', to: '/uikit/file' },
-                { label: 'Chart', icon: 'pi pi-fw pi-chart-bar', to: '/uikit/charts' },
-                { label: 'Misc', icon: 'pi pi-fw pi-circle', to: '/uikit/misc' }
+                { label: 'Mensajes', icon: 'pi pi-fw pi-eye', to: '/blocks', badge: 'NEW' },
+                { label: 'Clientes', icon: 'pi pi-fw pi-globe', to: '/blocks', badge: 'NEW'}
             ]
         },
         {
-            label: 'Consultas',
+            label: 'Info Facturacion',
             items: [
-                { label: 'Free Blocks', icon: 'pi pi-fw pi-eye', to: '/blocks', badge: 'NEW' },
-                { label: 'All Blocks', icon: 'pi pi-fw pi-globe', url: 'https://www.primefaces.org/primeblocks-react', target: '_blank' }
-            ]
-        },
-        {
-            label: 'Utilities',
-            items: [
-                { label: 'PrimeIcons', icon: 'pi pi-fw pi-prime', to: '/utilities/icons' },
-                { label: 'PrimeFlex', icon: 'pi pi-fw pi-desktop', url: 'https://www.primefaces.org/primeflex/', target: '_blank' }
+                { label: 'Facturacion', icon: 'pi pi-fw pi-prime', to: '/billing' }
+               
             ]
         },
         {
             label: 'Pages',
             icon: 'pi pi-fw pi-briefcase',
             to: '/pages',
-            items: [
+            items: [ { label: 'PrimeIcons', icon: 'pi pi-fw pi-prime', to: '/utilities/icons' },
+            { label: 'PrimeFlex', icon: 'pi pi-fw pi-desktop', url: 'https://www.primefaces.org/primeflex/', target: '_blank' },
                 {
                     label: 'Landing',
                     icon: 'pi pi-fw pi-globe',
@@ -76,7 +63,23 @@ const AppMenu = () => {
                             label: 'Access Denied',
                             icon: 'pi pi-fw pi-lock',
                             to: '/auth/access'
-                        }
+                        },
+                        { label: 'Cliente', icon: 'pi pi-fw pi-id-card', to: '/uikit/formlayout' },
+                        { label: 'Input', icon: 'pi pi-fw pi-check-square', to: '/uikit/input' },
+                        { label: 'Float Label', icon: 'pi pi-fw pi-bookmark', to: '/uikit/floatlabel' },
+                        { label: 'Invalid State', icon: 'pi pi-fw pi-exclamation-circle', to: '/uikit/invalidstate' },
+                        { label: 'Button', icon: 'pi pi-fw pi-mobile', to: '/uikit/button', class: 'rotated-icon' },
+                        { label: 'Table', icon: 'pi pi-fw pi-table', to: '/uikit/table' },
+                        { label: 'List', icon: 'pi pi-fw pi-list', to: '/uikit/list' },
+                        { label: 'Tree', icon: 'pi pi-fw pi-share-alt', to: '/uikit/tree' },
+                        { label: 'Panel', icon: 'pi pi-fw pi-tablet', to: '/uikit/panel' },
+                        { label: 'Overlay', icon: 'pi pi-fw pi-clone', to: '/uikit/overlay' },
+                        { label: 'Media', icon: 'pi pi-fw pi-image', to: '/uikit/media' },
+                        { label: 'Menu', icon: 'pi pi-fw pi-bars', to: '/uikit/menu', preventExact: true },
+                        { label: 'Message', icon: 'pi pi-fw pi-comment', to: '/uikit/message' },
+                        { label: 'File', icon: 'pi pi-fw pi-file', to: '/uikit/file' },
+                        { label: 'Chart', icon: 'pi pi-fw pi-chart-bar', to: '/uikit/charts' },
+                        { label: 'Misc', icon: 'pi pi-fw pi-circle', to: '/uikit/misc' }
                     ]
                 },
                 {
@@ -114,7 +117,7 @@ const AppMenu = () => {
                             items: [
                                 { label: 'Submenu 1.1.1', icon: 'pi pi-fw pi-bookmark' },
                                 { label: 'Submenu 1.1.2', icon: 'pi pi-fw pi-bookmark' },
-                                { label: 'Submenu 1.1.3', icon: 'pi pi-fw pi-bookmark' },
+                                { label: 'Submenu 1.1.3', icon: 'pi pi-fw pi-bookmark' }
                             ]
                         },
                         {

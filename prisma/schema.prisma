@@ -1,10 +1,12 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  schemas  = ["config", "iqsoft"]
 }
 
 model messaging_audio {
@@ -12,6 +14,8 @@ model messaging_audio {
   wamid      String? @db.VarChar
   audio_type String? @db.VarChar
   audio_id   String? @db.VarChar
+
+  @@schema("iqsoft")
 }
 
 model messaging_image {
@@ -23,6 +27,7 @@ model messaging_image {
   image_caption String? @db.VarChar
 
   @@unique([wamid, image_sha256], map: "messaging_image_uk")
+  @@schema("iqsoft")
 }
 
 model messaging_product {
@@ -37,8 +42,324 @@ model messaging_product {
   msg_text      String?  @db.VarChar
   template_id   String?  @db.VarChar
   msg_status    String   @db.VarChar
-  msg_stamp     DateTime? @db.Timestamp(6)
-  stamp         DateTime? @db.Timestamp(6)
+  msg_stamp     DateTime @db.Timestamp(6)
+  stamp         DateTime @db.Timestamp(6)
 
   @@unique([phone_id, company_id, wamid, wam_id_parent], map: "messaging_product_un")
+  @@schema("iqsoft")
+}
+
+model company {
+  Id                   String           @id(map: "PK_company") @db.Uuid
+  Active               Boolean
+  IdUserCreated        Int
+  DateCreated          DateTime         @db.Timestamp(6)
+  IdUserModified       Int?
+  DateModified         DateTime?        @db.Timestamp(6)
+  CodeCompany          String?          @db.VarChar(20)
+  DisplayCompany       String           @db.VarChar(100)
+  ImageCompany         Bytes?
+  IconCompany          String?          @db.VarChar(200)
+  FileNameImage        String?          @db.VarChar
+  CompanyGroupId       Int
+  IDCompanyParent      String?          @db.Uuid
+  IdentificationNumber String?          @db.VarChar(15)
+  Email                String?
+  Address              String?          @db.VarChar(1000)
+  Phone                String?          @db.VarChar(50)
+  Url                  String?          @db.VarChar(50)
+  IsCertificated       Boolean          @default(false)
+  company_group        company_group    @relation(fields: [CompanyGroupId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_company_company_group_CompanyGroupId")
+  company_branch       company_branch[]
+  profile              profile[]
+  user_interface       user_interface[]
+
+  @@index([CompanyGroupId], map: "IX_company_CompanyGroupId")
+  @@schema("config")
+}
+
+model company_branch {
+  Id                Int           @id(map: "PK_company_branch") @default(autoincrement())
+  Active            Boolean
+  IdUserCreated     Int
+  DateCreated       DateTime      @db.Timestamp(6)
+  IdUserModified    Int?
+  DateModified      DateTime?     @db.Timestamp(6)
+  CodeBranch        String        @db.VarChar(8)
+  DisplayBranch     String        @db.VarChar(100)
+  ImageBranch       String?       @db.VarChar(100)
+  IconBranch        Bytes?
+  AllowModification Boolean
+  IdBranchParent    Int?
+  DirCodeState      String?       @db.VarChar(5)
+  DirIdCity         String?       @db.VarChar(5)
+  DirStreet         String?       @db.VarChar(200)
+  DirHouseNumber    String?       @db.VarChar(100)
+  DirBuildingcode   String?       @db.VarChar(90)
+  DirReferences     String?       @db.VarChar(200)
+  PhPhoneNumber     String?
+  PhPhoneExt        Int?
+  CompanyId         String        @db.Uuid
+  company           company       @relation(fields: [CompanyId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_company_branch_company_CompanyId")
+  user_branch       user_branch[]
+
+  @@index([CompanyId], map: "IX_company_branch_CompanyId")
+  @@schema("config")
+}
+
+model company_group {
+  Id                 Int                  @id(map: "PK_company_group") @default(autoincrement())
+  Active             Boolean
+  IdUserCreated      Int
+  DateCreated        DateTime             @db.Timestamp(6)
+  IdUserModified     Int?
+  DateModified       DateTime?            @db.Timestamp(6)
+  Display            String?              @db.VarChar(100)
+  company            company[]
+  user_company_group user_company_group[]
+
+  @@schema("config")
+}
+
+model document_emission_module_interface {
+  Id                 Int              @id(map: "PK_document_emission_module_interface") @default(autoincrement())
+  Active             Boolean
+  IdUserCreated      Int
+  DateCreated        DateTime         @db.Timestamp(6)
+  IdUserModified     Int?
+  DateModified       DateTime?        @db.Timestamp(6)
+  DocumentEmissionId Int
+  ModuleInterfaceId  Int
+  module_interface   module_interface @relation(fields: [ModuleInterfaceId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_document_emission_module_interface_module_interface_ModuleI~")
+
+  @@unique([DocumentEmissionId, ModuleInterfaceId], map: "IX_document_emission_module_interface_DocumentEmissionId_Modul~")
+  @@index([ModuleInterfaceId], map: "IX_document_emission_module_interface_ModuleInterfaceId")
+  @@schema("config")
+}
+
+model module {
+  Id                Int                @id(map: "PK_module") @default(autoincrement())
+  Active            Boolean
+  IdUserCreated     Int
+  DateCreated       DateTime           @db.Timestamp(6)
+  IdUserModified    Int?
+  DateModified      DateTime?          @db.Timestamp(6)
+  ModuleSchema      String?
+  DisplayModule     String?
+  ImageModule       String?
+  IconModule        String?
+  AllowModification Boolean
+  IdHtml            String?
+  ModuleVersion     String?
+  Host              String?
+  Port              String?
+  PathBase          String?
+  BaseColor         String?
+  TextColor         String?
+  IdModuleParent    Int?
+  ModuleOrder       Int
+  Abreviation       String?
+  module_interface  module_interface[]
+
+  @@schema("config")
+}
+
+model module_interface {
+  Id                                 Int                                  @id(map: "PK_module_interface") @default(autoincrement())
+  Active                             Boolean
+  IdUserCreated                      Int
+  DateCreated                        DateTime                             @db.Timestamp(6)
+  IdUserModified                     Int?
+  DateModified                       DateTime?                            @db.Timestamp(6)
+  ModuleId                           Int
+  DisplayInterface                   String?
+  Url                                String?
+  Extend                             Bytes?
+  ModuleInterfaceTabId               Int
+  IdHtml                             String?
+  IconInterface                      String?
+  IdInterfaceParent                  Int?
+  InterfaceOrder                     Int
+  UserAccessId                       Int?
+  AccessId                           Int                                  @default(0)
+  GenerateDocument                   Boolean                              @default(false)
+  document_emission_module_interface document_emission_module_interface[]
+  module                             module                               @relation(fields: [ModuleId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_module_interface_module_ModuleId")
+  module_interface_tab               module_interface_tab                 @relation(fields: [ModuleInterfaceTabId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_module_interface_module_interface_tab_ModuleInterfaceTabId")
+  user_access                        user_access?                         @relation(fields: [UserAccessId], references: [Id], onDelete: Restrict, onUpdate: NoAction, map: "FK_module_interface_user_access_UserAccessId")
+  profile_interface                  profile_interface[]
+  user_interface                     user_interface[]
+  voucher_type_module_interface      voucher_type_module_interface[]
+
+  @@index([ModuleId], map: "IX_module_interface_ModuleId")
+  @@index([ModuleInterfaceTabId], map: "IX_module_interface_ModuleInterfaceTabId")
+  @@index([UserAccessId], map: "IX_module_interface_UserAccessId")
+  @@schema("config")
+}
+
+model module_interface_tab {
+  Id                Int                @id(map: "PK_module_interface_tab") @default(autoincrement())
+  Active            Boolean
+  IdUserCreated     Int
+  DateCreated       DateTime           @db.Timestamp(6)
+  IdUserModified    Int?
+  DateModified      DateTime?          @db.Timestamp(6)
+  CodeTab           String?
+  DisplayTab        String?
+  Url               String?
+  IconTab           String?
+  IdTabParent       Int?
+  TabOrder          Int
+  AllowModification Boolean
+  module_interface  module_interface[]
+
+  @@schema("config")
+}
+
+model profile {
+  Id                Int                 @id(map: "PK_profile") @default(autoincrement())
+  Active            Boolean
+  IdUserCreated     Int
+  DateCreated       DateTime            @db.Timestamp(6)
+  IdUserModified    Int?
+  DateModified      DateTime?           @db.Timestamp(6)
+  CompanyId         String              @db.Uuid
+  CodeProfile       String?
+  DisplayProfile    String?
+  IdProfileParent   Int?
+  ProfileOrder      Int
+  company           company             @relation(fields: [CompanyId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_profile_company_CompanyId")
+  profile_interface profile_interface[]
+
+  @@index([CompanyId], map: "IX_profile_CompanyId")
+  @@schema("config")
+}
+
+model profile_interface {
+  Id                Int              @id(map: "PK_profile_interface") @default(autoincrement())
+  Active            Boolean
+  IdUserCreated     Int
+  DateCreated       DateTime         @db.Timestamp(6)
+  IdUserModified    Int?
+  DateModified      DateTime?        @db.Timestamp(6)
+  ProfileId         Int
+  ModuleInterfaceId Int
+  UserId            Int
+  module_interface  module_interface @relation(fields: [ModuleInterfaceId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_profile_interface_module_interface_ModuleInterfaceId")
+  profile           profile          @relation(fields: [ProfileId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_profile_interface_profile_ProfileId")
+  user              user             @relation(fields: [UserId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_profile_interface_user_UserId")
+
+  @@unique([ProfileId, ModuleInterfaceId, UserId], map: "IX_profile_interface_ProfileId_ModuleInterfaceId_UserId")
+  @@index([ModuleInterfaceId], map: "IX_profile_interface_ModuleInterfaceId")
+  @@index([UserId], map: "IX_profile_interface_UserId")
+  @@schema("config")
+}
+
+model user {
+  Id                 Int                  @id(map: "PK_user") @default(autoincrement())
+  Active             Boolean
+  IdUserCreated      Int
+  DateCreated        DateTime             @db.Timestamp(6)
+  IdUserModified     Int?
+  DateModified       DateTime?            @db.Timestamp(6)
+  Email              String?
+  IdParent           Int?
+  IsLocal            Boolean?
+  Pass               String?
+  PersonId           Int?
+  UserAccessId       Int
+  OldPass            String?              @db.VarChar
+  auth               Boolean
+  profile_interface  profile_interface[]
+  user_access        user_access          @relation(fields: [UserAccessId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_user_user_access_UserAccessId")
+  user_branch        user_branch[]
+  user_company_group user_company_group[]
+  user_interface     user_interface[]
+
+  @@index([PersonId], map: "IX_user_PersonId")
+  @@index([UserAccessId], map: "IX_user_UserAccessId")
+  @@schema("config")
+}
+
+model user_access {
+  Id               Int                @id(map: "PK_user_access") @default(autoincrement())
+  Active           Boolean
+  IdUserCreated    Int
+  DateCreated      DateTime           @db.Timestamp(6)
+  IdUserModified   Int?
+  DateModified     DateTime?          @db.Timestamp(6)
+  DisplayAccess    String?
+  IsReadonly       Boolean
+  module_interface module_interface[]
+  user             user[]
+
+  @@schema("config")
+}
+
+model user_branch {
+  UserId         Int
+  BranchId       Int
+  Active         Boolean
+  IdUserCreated  Int
+  DateCreated    DateTime       @db.Timestamp(6)
+  IdUserModified Int?
+  DateModified   DateTime?      @db.Timestamp(6)
+  company_branch company_branch @relation(fields: [BranchId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_user_branch_company_branch_BranchId")
+  user           user           @relation(fields: [UserId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_user_branch_user_UserId")
+
+  @@id([UserId, BranchId], map: "PK_user_branch")
+  @@index([BranchId], map: "IX_user_branch_BranchId")
+  @@schema("config")
+}
+
+model user_company_group {
+  UserAdminId    Int
+  CompanyGroupId Int
+  Active         Boolean
+  IdUserCreated  Int
+  DateCreated    DateTime      @db.Timestamp(6)
+  IdUserModified Int?
+  DateModified   DateTime?     @db.Timestamp(6)
+  company_group  company_group @relation(fields: [CompanyGroupId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_user_company_group_company_group_CompanyGroupId")
+  user           user          @relation(fields: [UserAdminId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_user_company_group_user_UserAdminId")
+
+  @@id([CompanyGroupId, UserAdminId], map: "PK_user_company_group")
+  @@index([UserAdminId], map: "IX_user_company_group_UserAdminId")
+  @@schema("config")
+}
+
+model user_interface {
+  Id                Int              @id(map: "PK_user_interface") @default(autoincrement())
+  Active            Boolean
+  IdUserCreated     Int
+  DateCreated       DateTime         @db.Timestamp(6)
+  IdUserModified    Int?
+  DateModified      DateTime?        @db.Timestamp(6)
+  CompanyId         String           @db.Uuid
+  UserId            Int
+  ModuleInterfaceId Int
+  company           company          @relation(fields: [CompanyId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_user_interface_company_CompanyId")
+  module_interface  module_interface @relation(fields: [ModuleInterfaceId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_user_interface_module_interface_ModuleInterfaceId")
+  user              user             @relation(fields: [UserId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_user_interface_user_UserId")
+
+  @@unique([UserId, CompanyId, ModuleInterfaceId], map: "IX_user_interface_UserId_CompanyId_ModuleInterfaceId")
+  @@index([CompanyId], map: "IX_user_interface_CompanyId")
+  @@index([ModuleInterfaceId], map: "IX_user_interface_ModuleInterfaceId")
+  @@schema("config")
+}
+
+model voucher_type_module_interface {
+  Id                Int              @id(map: "PK_voucher_type_module_interface") @default(autoincrement())
+  Active            Boolean
+  IdUserCreated     Int
+  DateCreated       DateTime         @db.Timestamp(6)
+  IdUserModified    Int?
+  DateModified      DateTime?        @db.Timestamp(6)
+  VoucherTypeId     Int
+  ModuleInterfaceId Int
+  module_interface  module_interface @relation(fields: [ModuleInterfaceId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_voucher_type_module_interface_module_interface_ModuleInterf~")
+
+  @@unique([VoucherTypeId, ModuleInterfaceId], map: "IX_voucher_type_module_interface_VoucherTypeId_ModuleInterface~")
+  @@index([ModuleInterfaceId], map: "IX_voucher_type_module_interface_ModuleInterfaceId")
+  @@schema("config")
 }

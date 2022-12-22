@@ -106,7 +106,7 @@ const Layout = (props) => {
     return (
         <React.Fragment>
             <Head>
-                <title>Sakai by PrimeReact | Free Admin Template for NextJS</title>
+                <title>Whatsapp | Global TI Services</title>
                 <meta charSet="UTF-8" />
                 <meta name="description" content="The ultimate collection of design-agnostic, flexible and accessible React UI Components." />
                 <meta name="robots" content="index, follow" />
@@ -135,5 +135,6 @@ const Layout = (props) => {
         </React.Fragment>
     );
 };
+
 
 export default Layout;

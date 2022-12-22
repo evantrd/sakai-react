@@ -2,8 +2,13 @@ import jwt from 'jsonwebtoken';
 import { serialize } from 'cookie';
 import axios from 'axios';
 
+
+
+
+
 export default async function loginHandler(req, res) {
     const { email, password } = req.body;
+
     // console.log(req.body);
     const response = await axios.post('http://localhost:3000/api/user',{ email, password }).catch(function (error) {
         if (error.response) {

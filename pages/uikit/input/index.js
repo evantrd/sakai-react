@@ -182,7 +182,7 @@ export const InputDemo = () => {
                     <Calendar showIcon showButtonBar value={calendarValue} onChange={(e) => setCalendarValue(e.value)}></Calendar>
 
                     <h5>InputNumber</h5>
-                    <InputNumber value={inputNumberValue} onValueChange={(e) => setInputNumberValue(e.value)} showButtons mode="decimal"></InputNumber>
+                    <InputNumber value={inputNumberValue} onValueChange={(e) => setInputNumberValue(e.value)} showButtons pattern="[0-9]{0,13}"></InputNumber>
 
                     <h5>Chips</h5>
                     <Chips value={chipsValue} onChange={(e) => setChipsValue(e.value)} />

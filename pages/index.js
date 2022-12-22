@@ -4,12 +4,18 @@ import { Chart } from 'primereact/chart';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import { Menu } from 'primereact/menu';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState,createContext} from 'react';
 import { ProductService } from '../demo/service/ProductService';
 import { LayoutContext } from '../layout/context/layoutcontext';
 import Link from 'next/link';
 import axios from 'axios';
+import { MenuProvider,MenuContext } from '../layout/context/menucontext';
+import AppMenu from '../layout/AppMenu';
+import AppMenuitem from '../layout/AppMenuitem';
 //import apiMessage from '../pages/api/message/app'
+
+
+export const menuItemContext = createContext();
 const lineData = {
     labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Juio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
     datasets: [
@@ -34,14 +40,14 @@ const lineData = {
 
 
 
-//apiMessage()
-
-const Dashboard = () => {
+const Dashboard = ({model}) => {
+  
     const [products, setProducts] = useState(null);
     const menu1 = useRef(null);
     const menu2 = useRef(null);
     const [lineOptions, setLineOptions] = useState(null);
     const { layoutConfig } = useContext(LayoutContext);
+    const [menuItems, setMenuItems] = useState(null);
     const contextPath = getConfig().publicRuntimeConfig.contextPath;
 
     const getProfile= async (e)=>{ 
@@ -50,6 +56,12 @@ const Dashboard = () => {
     console.log(response)
     };
 
+   
+    //  if  ({model}){
+    //     setMenuItems({model:'hola mundo'});
+    //     console.log(model)
+    //  }
+    // console.log(model)
     const applyLightTheme = () => {
         const lineOptions = {
             plugins: {
@@ -132,6 +144,7 @@ const Dashboard = () => {
     };
 
     return (
+        <menuItemContext.Provider value={model}>
         <div className="grid">
             <div className="col-12 lg:col-6 xl:col-4">
                 <div className="card mb-0">
@@ -185,15 +198,7 @@ const Dashboard = () => {
                     <div className="flex justify-content-between align-items-center mb-5">
                         <h5>Suscripciones</h5>
                         <div>
-                            <Button type="button" icon="pi pi-ellipsis-v" className="p-button-rounded p-button-text p-button-plain" onClick={(event) => menu1.current.toggle(event)} />
-                            <Menu
-                                ref={menu1}
-                                popup
-                                model={[
-                                    { label: 'Add New', icon: 'pi pi-fw pi-plus' },
-                                    { label: 'Remove', icon: 'pi pi-fw pi-minus' }
-                                ]}
-                            />
+ 
                         </div>
                     </div>
                     <ul className="list-none p-0 m-0">
@@ -320,12 +325,92 @@ const Dashboard = () => {
                     <h5>Interaccion Mensajes Clientes</h5>
                     <Chart type="line" data={lineData} options={lineOptions} />
                 </div>
-
-    
-    
             </div>
+            {/* <ul className="layout-menu">
+                {model?.map((item, i) => {
+                    return !item.seperator ? <AppMenuitem  item={item} root={true} index={i} key={item.label} /> : <li className="menu-separator"></li>;
+                })}
+            </ul> */}
         </div>
+        </menuItemContext.Provider>
+        
+        
     );
 };
+
+
+
+
+// export async function getStaticProps() {
+//     // Call an external API endpoint to get posts.
+//     // You can use any data fetching library
+//     // const res = await axios.get('http://localhost:3000/api/menu')
+//     const response = await axios.get('http://localhost:3000/api/menu').catch(function (error) {
+//       if (error.response) {
+//           // La respuesta fue hecha y el servidor respondió con un código de estado
+//           // que esta fuera del rango de 2xx
+//           console.log(error.response.data);
+//           console.log(error.response.status);
+//           console.log(error.response.headers);
+//       } else if (error.request) {
+//           // La petición fue hecha pero no se recibió respuesta
+//           // `error.request` es una instancia de XMLHttpRequest en el navegador y una instancia de
+//           // http.ClientRequest en node.js
+//           console.log(error.request);
+//       } else {
+//           // Algo paso al preparar la petición que lanzo un Error
+//           console.log('Error', error.message);
+//       }
+//       console.log(error.config);
+//   });
+//      const model = await response.data;
+//     //   console.log(model)
+    
+//     // By returning { props: { posts } }, the Blog component
+//     // will receive `posts` as a prop at build time
+//     return {
+//       props: {
+//         model,
+//       },
+//     }
+  
+//   }
+
+   
+// export async function getServerSideProps() {
+//     // Call an external API endpoint to get posts.
+//     // You can use any data fetching library
+//     // const res = await axios.get('http://localhost:3000/api/menu')
+//     const response = await axios.get('http://localhost:3000/api/customer').catch(function (error) {
+//       if (error.response) {
+//           // La respuesta fue hecha y el servidor respondió con un código de estado
+//           // que esta fuera del rango de 2xx
+//           console.log(error.response.data);
+//           console.log(error.response.status);
+//           console.log(error.response.headers);
+//       } else if (error.request) {
+//           // La petición fue hecha pero no se recibió respuesta
+//           // `error.request` es una instancia de XMLHttpRequest en el navegador y una instancia de
+//           // http.ClientRequest en node.js
+//           console.log(error.request);
+//       } else {
+//           // Algo paso al preparar la petición que lanzo un Error
+//           console.log('Error', error.message);
+//       }
+//       console.log(error.config);
+//   });
+//      const model = await response.data;
+//        console.log(model)
+    
+//     // By returning { props: { posts } }, the Blog component
+//     // will receive `posts` as a prop at build time
+//     return {
+//       props: {
+//         model,
+//       },
+//     }
+  
+//   }
+
 
 export default Dashboard;

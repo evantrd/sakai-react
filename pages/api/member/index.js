@@ -1,4 +1,3 @@
-import { response } from 'express';
 import {conn} from '../../../utils/database'
 
 export default async (NextApiRequest,NextApiResponse)=> {
@@ -49,8 +48,8 @@ case "GET": try {
       MaritalStatusId,
       BornDate,
       Email,
-      Phone1.replace(/-/g,''),  
-      Phone2.replace(/-/g,''),
+      Phone1?.replace(/-/g,''),  
+      Phone2?.replace(/-/g,''),
       Id    
       ],
   }
@@ -62,8 +61,7 @@ case "GET": try {
   return NextApiResponse.status(500).json({message: error.message});
 }
 case "POST":try {
-  console.log('entro a'+method);
-  console.log(body);
+
   const  {Id,
     Active,
     FirstName,
@@ -78,7 +76,6 @@ case "POST":try {
     Phone2, 
   } = body
 
- 
   const text = 'INSERT INTO iqsoft.member ("Active", "IdUserCreated", "DateCreated", "IdUserModified", "DateModified", "FirstName", "LastName", "IdentificationType", "NoIdentification", "GenderTypeId", "MaritalStatusId", "BornDate", "CompanyId", "Email", "Phone1", "AddresId", "Phone2") VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) RETURNING *'
   const values = [
     Active,
@@ -95,9 +92,9 @@ case "POST":try {
     BornDate,
     CompanyId,
     Email,
-    Phone1.replace(/-/g,''),
+    Phone1?.replace(/-/g,''),
     null,
-    Phone2.replace(/-/g,'')    
+    Phone2?.replace(/-/g,'')    
     ]
 
     

@@ -23,7 +23,7 @@ const SignupSchema = Yup.object().shape({
     Email: Yup.string().email('Invalid email').required('Required')
 });
 
-const Crud = ({ suscriptions }) => {
+const Crud = ({ querySuscriptions }) => {
     let emptyPost = {
         Id: null,
         Active: true,
@@ -51,7 +51,7 @@ const Crud = ({ suscriptions }) => {
     const [submitted, setSubmitted] = useState(false);
     const [globalFilter, setGlobalFilter] = useState(null);
     const [multiselectValue, setMultiselectValue] = useState(null);
-    const [suscriptionSelectValue, setSuscriptionSelectValue] = useState(null);
+    const [suscriptions, setSuscriptions] = useState(querySuscriptions);
     const toast = useRef(null);
     const dt = useRef(null);
     const contextPath = getConfig().publicRuntimeConfig.contextPath;
@@ -80,7 +80,7 @@ const Crud = ({ suscriptions }) => {
 
     const hideDialog = () => {
         setSubmitted(false);
-        setPostDialog(false);save
+        setPostDialog(false);
     };
 
     const hideDeletePostDialog = () => {
@@ -98,6 +98,7 @@ const Crud = ({ suscriptions }) => {
             let _posts = [...posts];
             let _post = { ...post };
             let _multiselectValue = multiselectValue ;
+            let _suscriptions = suscriptions ;
             if (post.Id) {
                 const index = findIndexById(post.Id);
                 //       if ( _post.NoIdentification.length = 9){
@@ -116,12 +117,16 @@ const Crud = ({ suscriptions }) => {
                     });
 
           
+                    _suscriptions.splice(_suscriptions.findIndex(e => e.Id == _post.Id),1);
+                     
+
                     for (var i = 0; i < _multiselectValue.length; ++i) {
                        
                         _multiselectValue[i].isSelected = _post.Id;                          
                     }
+
                         
-                    
+                    _suscriptions.push(_multiselectValue);
                             axios
                     .post('http://localhost:3000/api/suscription', _multiselectValue)
                     .then(function (response) {
@@ -133,14 +138,13 @@ const Crud = ({ suscriptions }) => {
                     });
 
           } else {
-                _post.Id = createId();
-
+                _post.Id = createId();             
                 _posts.push(_post);
                 axios
                     .post('http://localhost:3000/api/member', _post)
                     .then(function (response) {
                         console.log(response);
-                        toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Creado con Exito', life: 3000 });
+                        toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Miembro Creado con Exito', life: 3000 });
                     })
                     .catch(function (error) {
                         console.log(error);
@@ -152,6 +156,7 @@ const Crud = ({ suscriptions }) => {
             }
 
             setPosts(_posts);
+            setSuscriptions(_suscriptions);
             setPostDialog(false);
             setPost(emptyPost);
         }
@@ -187,11 +192,29 @@ const Crud = ({ suscriptions }) => {
     };
 
     const deletePost = () => {
-        let _posts = posts.filter((val) => val.Id !== post.Id);
-        setPosts(_posts);
-        setDeletePostDialog(false);
-        setPost(emptyPost);
-        toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Post Deleted', life: 3000 });
+ 
+        axios.delete('http://localhost:3000/api/member', {data :{Id:post.Id}})
+                    .then(function (response) {
+                        console.log(response);
+                        let _posts = posts.filter((val) => val.Id !== post.Id);
+            setPosts(_posts);
+            setDeletePostDialog(false);
+            setPost(emptyPost);
+            toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Miembreo Eliminado', life: 3000 });
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+
+        axios.delete('http://localhost:3000/api/suscription', {data:{Id: post.Id}}).then(function (response) {
+            console.log(response);
+
+            toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Suscripcion Eliminada', life: 3000 });
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
+
     };
 
     const findIndexById = (id) => {
@@ -406,7 +429,7 @@ const Crud = ({ suscriptions }) => {
                                     onSelectionChange={(e) => setSelectedPosts(e.value)}
                                     dataKey="Id"
                                     paginator
-                                    rows={10}
+                                    rows={20}
                                     rowsPerPageOptions={[5, 10, 25]}
                                     className="datatable-responsive"
                                     paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
@@ -499,7 +522,7 @@ const Crud = ({ suscriptions }) => {
                                         <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
                                         {post && (
                                             <span>
-                                                Are you sure you want to delete <b>{post.FirsName}</b>?
+                                                ¿Estás segura de que quieres eliminar?<b>{post.FirsName}</b>?
                                             </span>
                                         )}
                                     </div>
@@ -508,7 +531,7 @@ const Crud = ({ suscriptions }) => {
                                 <Dialog visible={deletePostsDialog} style={{ width: '450px' }} header="Confirm" modal footer={deletePostsDialogFooter} onHide={hideDeletePostsDialog}>
                                     <div className="flex align-items-center justify-content-center">
                                         <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
-                                        {post && <span>Are you sure you want to delete the selected posts?</span>}
+                                        {post && <span>¿Estás segura de que quieres eliminar los miembros seleccionados?</span>}
                                     </div>
                                 </Dialog>
                             </Form>
@@ -541,14 +564,14 @@ export async function getStaticProps() {
         }
         console.log(error.config);
     });
-    const suscriptions = await response.data;
+    const querySuscriptions = await response.data;
     //    console.log(suscriptions)
 
     // By returning { props: { posts } }, the Blog component
     // will receive `posts` as a prop at build time
     return {
         props: {
-            suscriptions
+            querySuscriptions
         }
     };
 }

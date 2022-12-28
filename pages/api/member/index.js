@@ -96,8 +96,8 @@ case "POST":try {
 
     
   const res = await conn.query(text,values)
-  console.log(res);
-  return NextApiResponse.status(200).json(res.rows);
+  console.log(res.rows[0]);
+  return NextApiResponse.status(200).json(res.rows[0]);
 }catch(error){
   return NextApiResponse.status(500).json({message: error.message});
 }

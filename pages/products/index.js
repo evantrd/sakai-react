@@ -5,7 +5,6 @@ import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import { Dialog } from 'primereact/dialog';
-import { FileUpload } from 'primereact/fileupload';
 import { InputText } from 'primereact/inputtext';
 import { InputMask } from 'primereact/inputmask';
 import { MultiSelect } from 'primereact/multiselect';
@@ -16,6 +15,15 @@ import { classNames } from 'primereact/utils';
 import React, { useEffect, useRef, useState } from 'react';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
+import { InputNumber } from 'primereact/inputnumber';
+import { OverlayPanel } from 'primereact/overlaypanel';
+import { Fieldset } from 'primereact/fieldset';
+import { Dropdown } from 'primereact/dropdown';
+import ProductClasification from '../../components/inventory/ProductClasification.jsx'
+import ProductSection from '../../components/inventory/ProductSection.jsx'
+import ProductTray from '../../components/inventory/ProductTray.jsx'
+import ProductWarranty from '../../components/inventory/ProductWarranty.jsx';
+import CountryIva from '../../components/common/CountryIva.jsx';
 
 const SignupSchema = Yup.object().shape({
     FirstName: Yup.string().min(2, 'Too Short!').max(50, 'Too Long!').required('Required'),
@@ -54,6 +62,8 @@ const Crud = ({ querySuscriptions }) => {
     const [suscriptions, setSuscriptions] = useState(querySuscriptions);
     const toast = useRef(null);
     const dt = useRef(null);
+    const op = useRef(null);
+    const op2 = useRef(null);
     const contextPath = getConfig().publicRuntimeConfig.contextPath;
 
     useEffect(() => {
@@ -71,7 +81,10 @@ const Crud = ({ querySuscriptions }) => {
 
     let multiselectValues = suscriptions.filter((suscriptions) => suscriptions.id === -1);
 
-    
+    const formatCurrency = (value) => {
+        return value?.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+    };
+
     const openNew = () => {
         setPost(emptyPost);
         setMultiselectValue(emptySuscription);
@@ -92,6 +105,11 @@ const Crud = ({ querySuscriptions }) => {
         setDeletePostsDialog(false);
     };
 
+    const toggle = (event) => {
+        op.current.toggle(event);
+    };
+
+
     const savePost = async ()  => {
         setSubmitted(true);
 
@@ -104,10 +122,7 @@ const Crud = ({ querySuscriptions }) => {
             let responseId = 0 ;
             if (post.Id) {
                 const index = findIndexById(post.Id);
-                //       if ( _post.NoIdentification.length = 9){
-                //         _post.IdentificationType = 1
-                //    } _post.IdentificationType = 2
-                let _post = { ...post };
+                   let _post = { ...post };
                 _posts[index] = _post;
                  responseId = _post.Id
                 axios
@@ -125,7 +140,7 @@ const Crud = ({ querySuscriptions }) => {
                 _posts.push(_post);
                 await  axios.post('http://localhost:3000/api/member', _post)
                     .then(function (response) {
-                        toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Miembro Creado con Exito', life: 3000 });
+                        toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Producto Creado con Exito', life: 3000 });
                         responseId =   response.data.Id;
                         _post.Id = responseId,
                         _post[`${'Id'}`] = responseId;
@@ -318,13 +333,12 @@ const Crud = ({ querySuscriptions }) => {
         );
     };
 
-    const emailBodyTemplate = (rowData) => {
-        return (
-            <>
-                <span className="p-column-title">Email</span>
-                {rowData.Email}
-            </>
-        );
+    const onInputNumberChange = (e, name) => {
+        const val = e.value || 0;
+        let _post = { ...post };
+        _post[`${name}`] = val;
+
+        setPost(_post);
     };
 
     const nameBodyTemplate = (rowData) => {
@@ -345,11 +359,11 @@ const Crud = ({ querySuscriptions }) => {
         return null;
     }
 
-    const phone1BodyTemplate = (rowData) => {
+    const priceBodyTemplate = (rowData) => {
         return (
             <>
-                <span className="p-column-title">Tel. 1</span>
-                {formatPhoneNumber(rowData.Phone1)}
+                <span className="p-column-title">Price</span>
+                {formatCurrency(rowData.price)}
             </>
         );
     };
@@ -389,14 +403,19 @@ const Crud = ({ querySuscriptions }) => {
         return (
             <>
                 <Button icon="pi pi-pencil" className="p-button-rounded p-button-success mr-2" onClick={() => editPost(rowData)} />
-                <Button icon="pi pi-trash" className="p-button-rounded p-button-warning" onClick={() => confirmDeletePost(rowData)} />
+                <Button icon="pi pi-trash" className="p-button-rounded p-button-warning mr-2" onClick={() => confirmDeletePost(rowData)} />
+                <Button icon="pi pi-images"  className="p-button-rounded p-button-info "   onClick={toggle}  />
+                                <OverlayPanel ref={op} appendTo={typeof window !== 'undefined' ? document.body : null} showCloseIcon>
+                                    <img src={`${contextPath}/demo/images/nature/nature9.jpg`} alt="nature1" />
+                                </OverlayPanel>
+
             </>
         );
     };
 
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h5 className="m-0">Administrar Miembros</h5>
+            <h5 className="m-0">Productos y Servicios</h5>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <i className="pi pi-search" />
                 <InputText type="search" onInput={(e) => setGlobalFilter(e.target.value)} placeholder="Buscar..." />
@@ -451,7 +470,10 @@ const Crud = ({ querySuscriptions }) => {
                         }}
                     >
                         {({ errors, touched, validateField }) => (
-                            <Form id="member">
+                            <Form id="product">
+                                                     </Form>
+                        )}
+                    </Formik>
                                 <DataTable
                                     ref={dt}
                                     value={posts}
@@ -459,92 +481,124 @@ const Crud = ({ querySuscriptions }) => {
                                     onSelectionChange={(e) => setSelectedPosts(e.value)}
                                     dataKey="Id"
                                     paginator
-                                    rows={25}
-                                    rowsPerPageOptions={[25,50 , 300]}
+                                    rows={50}
+                                    rowsPerPageOptions={[50,100, 300]}
                                     className="datatable-responsive"
                                     paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                                     currentPageReportTemplate="Showing {first} to {last} of {totalRecords} posts"
                                     globalFilter={globalFilter}
-                                    emptyMessage="Miembros no encontrados."
+                                    emptyMessage="Productos no encontrados."
                                     header={header}
                                     responsiveLayout="scroll"
                                 >
                                     <Column selectionMode="multiple" headerStyle={{ width: '2rem' }}></Column>
-                                    <Column field="FirstName" header="Nombre" sortable body={nameBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column>
-                                    <Column field="Phone1" header="Telefono 1" body={phone1BodyTemplate} headerStyle={{ minWidth: '9rem' }}></Column>
-                                    <Column field="Phone2" header="Telefono 2" body={phon2BodyTemplate} headerStyle={{ minWidth: '9rem' }}></Column>
-                                    <Column field="Email" header="Email" body={emailBodyTemplate} sortable headerStyle={{ minWidth: '9rem' }}></Column>
-                                    <Column field="Active" header="Estatus" body={statusBodyTemplate} sortable headerStyle={{ minWidth: '5rem' }} hidden={true}></Column>
-                                    <Column field="Suscriptions" header="Suscripciones" headerStyle={{ minWidth: '9rem' }}></Column>
-                                    <Column field="NoIdentification" header="NoIdentification" hidden={true}></Column>
-                                    <Column body={actionBodyTemplate} headerStyle={{ minWidth: '9rem' }} align="right"></Column>
+                                    <Column field="code" header="Codigo" body={phon2BodyTemplate} headerStyle={{ minWidth: '9rem' }} sortable></Column>
+                                    <Column field="Description" header="Descripcion" sortable body={nameBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column>
+                                    <Column field="Cost" header="Costo" body={priceBodyTemplate} sortable></Column>
+                                    <Column field="Price" header="Precio" body={priceBodyTemplate} sortable headerStyle={{ minWidth: '9rem' }}></Column>
+                                    <Column field="Iva" header="Itbis" body={priceBodyTemplate} sortable headerStyle={{ minWidth: '9rem' }}></Column>
+                                    <Column field="TotalPrice" header="Neto" body={priceBodyTemplate} sortable headerStyle={{ minWidth: '9rem' }}></Column>
+                                    <Column field="Suscriptions" header="Clasificacion"  body={statusBodyTemplate} headerStyle={{ minWidth: '9rem' }} sortable></Column>
+                                    <Column field="classificationId" header="Sub Clasificacion"  headerStyle={{ minWidth: '9rem' }} hidden={true} ></Column>
+                                    <Column field="Existence" header="Existencia" hidden={false} sortable></Column>
+                                    <Column field="Active" header="Estatus" body={statusBodyTemplate} sortable headerStyle={{ minWidth: '5rem' }} hidden={false}></Column>                                    
+                                    <Column field="SubclassificationId" header="Sub Clasificacion" headerStyle={{ minWidth: '9rem' }} hidden={true} ></Column>
+                                    <Column field="BarCode" header="Codigo Barra" headerStyle={{ minWidth: '9rem' }} hidden={true} ></Column>
+                                    <Column field="Section" header="Tramo" headerStyle={{ minWidth: '9rem' }} hidden={true} ></Column>
+                                    <Column field="Tray" header="Bandeja" headerStyle={{ minWidth: '9rem' }} hidden={true} ></Column>                                    
+                                    <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }} align="centered" ></Column>
                                 </DataTable>
 
-                                <Dialog form="member" visible={postDialog} style={{ width: '450px' }} header="Detalle Miembros" modal className="p-fluid" footer={postDialogFooter} onHide={hideDialog}>
-                                    {post.image && <img src={`${contextPath}/demo/images/post/${post.image}`} alt={post.image} width="150" className="mt-0 mx-auto mb-5 block shadow-2" />}
+                                <Dialog form="member" visible={postDialog} style={{ width: '750px' }} header="Detalle Productos" modal className="p-fluid" footer={postDialogFooter} onHide={hideDialog}>
+                                    {/* {post.image && <img src={`${contextPath}/demo/images/post/${post.image}`} alt={post.image} width="150" className="mt-0 mx-auto mb-5 block shadow-2" />} */}
+                                   
+                                    <div className="formgrid grid">
+                                    <div className="field col">                                       
 
-                                    <div className="field">
-                                        <label htmlFor="FirstName">Nombre</label>
-                                        <InputText id="FirstName" value={post.FirstName} onChange={(e) => onInputChange(e, 'FirstName')} required autoFocus className={classNames({ 'p-invalid': submitted && !post.FirstName })} />
-                                        {submitted && !post.FirstName && <small className="p-invalid">Nombre requerido.</small>}
+                                        <div className="field col">
+                                        <label htmlFor="LastName">Codigo</label>
+                                        <InputText InputText id="FirstName" value={post.FirstName} onChange={(e) => onInputChange(e, 'FirstName')} required autoFocus className={classNames({ 'p-invalid': submitted && !post.FirstName })}/>
+                                        {submitted && !post.FirstName && <small className="p-invalid">Descripcion del  producto requerida.</small>}
                                     </div>
-                                    <div className="field">
-                                        <label htmlFor="LastName">Apellido</label>
-                                        <InputText id="LastName" value={post.LastName} onChange={(e) => onInputChange(e, 'LastName')} required />
+                                    <div className="field col">
+                                        <label htmlFor="LastName">Descripcion</label>
+                                        <InputText InputText id="FirstName" value={post.FirstName} onChange={(e) => onInputChange(e, 'FirstName')} required  className={classNames({ 'p-invalid': submitted && !post.FirstName })} />
+                                        {submitted && !post.FirstName && <small className="p-invalid">Descripcion del  producto requerida.</small>}
                                     </div>
-                                    <div className="field">
-                                        <label htmlFor="Email">Email</label>
-                                        <InputText form="member" id="Email" value={post.Email} onChange={(e) => onInputChange(e, 'Email')} rows={3} cols={20} required type="email" />
-                                        {submitted && errors.Email && touched.Email ? <div>{errors.Email}</div> : null}
+                                    <div className="field col">
+                                        <label htmlFor="LastName">Clasificacion</label>
+                                    <ProductClasification
+                                    />
+                                        </div>
+                                    </div>                                    
+    
+                                    {<img src={`${contextPath}/demo/images/product/gaming-set.jpg`} alt={post.image} width="300" className="mt-1 mx-auto mb-5 block shadow-2" />}
                                     </div>
                                     <div className="formgrid grid">
-                                        <div className="field col">
-                                            <label htmlFor="Phone1">Telefono 1</label>
-                                            <InputMask
-                                                id="Phone1"
-                                                mask="999-999-9999"
-                                                placeholder="000-000-0000"
-                                                value={post.Phone1}
-                                                onChange={(e) => onInputChange(e, 'Phone1')}
-                                                rows={3}
-                                                cols={20}
-                                                required
-                                                className={classNames({ 'p-invalid': submitted && !post.Phone1 })}
-                                            />
-                                            {submitted && !post.Phone1 && <small className="p-invalid">*</small>}
-                                        </div>
+                                    <div className="field col">
+                                <label htmlFor="cost">Costo</label>
+                                <InputNumber id="Cost" value={post.Cost} onValueChange={(e) => onInputNumberChange(e, 'price')} mode="currency" currency="USD" locale="en-US" />
+                            </div>
 
-                                        <div className="field col">
-                                            <label htmlFor="Phone2">Telefono 2</label>
-                                            <InputMask id="Phone2" mask="999-999-9999" placeholder="000-000-0000" value={post.Phone2} onChange={(e) => onInputChange(e, 'Phone2')} rows={3} cols={20} />
-                                        </div>
+                            <div className="field col">
+                                <label htmlFor="price">Precio</label>
+                                <InputNumber id="Price" value={post.Price} onValueChange={(e) => onInputNumberChange(e, 'price')} mode="currency" currency="USD" locale="en-US" />
+                            </div>
+                            <div className="field col">
+                                <label htmlFor="itbis">Itbis</label>
+                                <CountryIva/>
+                            </div>
+                            <div className="field col">
+                                <label htmlFor="total">Total</label>
+                                <InputNumber id="Total" value={post.Total} onValueChange={(e) => onInputNumberChange(e, 'price')} mode="currency" currency="USD" locale="en-US" />
+                            </div>
+                            
                                     </div>
 
-                                    <div className="formgrid grid">
+               
+                           <Fieldset legend="Avanzado" toggleable>
+                    <div className="formgrid grid">
                                         <div className="field col">
-                                            <label htmlFor="NoIdentification">Doc. Identidad</label>
-                                            <InputText id="NoIdentification" value={post.NoIdentification} onChange={(e) => onInputChange(e, 'NoIdentification')} rows={3} cols={20} />
+                                            <label htmlFor="NoIdentification">Seccion</label>
+
+                                            <ProductSection   />
                                         </div>
                                         <div className="field col">
-                                            <label htmlFor="BornDate">Aniversario</label>
+                                            <label htmlFor="NoIdentification">Bandeja</label>
+                                            {/* <Dropdown value={dropdownValue} onChange={(e) => setDropdownValue(e.value)} options={dropdownValues} optionLabel="name" placeholder="Select" /> */}
+                                            <ProductTray
+                                    />
+                                        </div>
+                                        <div className="field col">
+                                            <label htmlFor="BornDate">Codigo Barra</label>
 
                                             <Calendar id="BornDate" mask="99/99/9999" slotChar="mm/dd/yyyy" value={post.BornDate} onChange={(e) => onInputChange(e, 'BornDate')} rows={3} cols={20} />
                                         </div>
                                     </div>
-                                    <div className="field">
-                                        <ToggleButton id="Active" htmlFor="Active" checked={post.Active} onChange={(e) => onInputChange(e, 'Active')} onLabel="Cliente Activo" offLabel="Cliente Inactivo" />
-                                    </div>
+                                    <div className="formgrid grid">
+                                        <div className="field col">
+                                            <label htmlFor="NoIdentification">Garantia</label>
 
-                                    <MultiSelect
-                                        value={multiselectValue}
-                                        onChange={(e) => onSuscriptionChange(e, post)}
-                                        options={multiselectValues}
-                                        optionLabel="name"
-                                        placeholder="Seleccionar Suscripcion"
-                                        filter
-                                        display="chip"
-                                        itemTemplate={itemTemplate}
+                                            <ProductWarranty
                                     />
+                                        </div>
+                                        <div className="field col">
+                                            <label htmlFor="NoIdentification">Existencia Almacen</label>
+
+                                            <ToggleButton id="Active" htmlFor="Active" checked={post.Active} onChange={(e) => onInputChange(e, 'Active')} onLabel="Cliente Activo" offLabel="Cliente Inactivo" />
+                                        </div>
+                                        <div className="field col">
+                                            <label htmlFor="BornDate">Estatus</label>                        
+                                        <ToggleButton id="Active" htmlFor="Active" checked={post.Active} onChange={(e) => onInputChange(e, 'Active')} onLabel="Cliente Activo" offLabel="Cliente Inactivo" />
+                      
+                                        </div>
+                                    </div>
+                                   
+
+                    </Fieldset>
+
+                                   
+                                  
                                 </Dialog>
 
                                 <Dialog visible={deletePostDialog} style={{ width: '450px' }} header="Confirm" modal footer={deletePostDialogFooter} onHide={hideDeletePostDialog}>
@@ -561,12 +615,10 @@ const Crud = ({ querySuscriptions }) => {
                                 <Dialog visible={deletePostsDialog} style={{ width: '450px' }} header="Confirm" modal footer={deletePostsDialogFooter} onHide={hideDeletePostsDialog}>
                                     <div className="flex align-items-center justify-content-center">
                                         <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
-                                        {post && <span>¿Estás segura de que quieres eliminar los miembros seleccionados?</span>}
+                                        {post && <span>¿Estás segura de que quieres eliminar los Productos seleccionados?</span>}
                                     </div>
                                 </Dialog>
-                            </Form>
-                        )}
-                    </Formik>
+   
                 </div>
             </div>
         </div>

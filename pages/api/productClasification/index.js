@@ -10,7 +10,7 @@ case "GET": try {
   const query = {
     // give the query a unique name
     name: 'fetch-clasification',
-    text: 'select    c."Id"::int8 as "Id",   c."Active"::bool as "Active",   "Description" as name, "Code" ,   "InventoryControl" ,"CompanyId" from  iqsoft.product_clasification c where "CompanyId" = $1',
+    text: 'select    c."Id"::int8 as "id",   c."Active"::bool as "Active",   "Description" as name, "Code"  as code, c."Id"::text as value,   "InventoryControl" ,"CompanyId" from  iqsoft.product_clasification c where "CompanyId" = $1',
     values: [CompanyId],
   }
    const res = await conn.query(query)

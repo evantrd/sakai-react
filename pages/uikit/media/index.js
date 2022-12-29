@@ -56,21 +56,24 @@ const MediaDemo = () => {
         photoService.getImages().then((images) => setImages(images));
     }, []);
 
+
+console.log(products)
     const carouselItemTemplate = (product) => {
         return (
-            <div className="border-1 surface-border border-round m-1 text-center py-5">
+            <div className="flex justify-content-center">
                 <div className="mb-3">
-                    <img src={`${contextPath}/demo/images/product/${product.image}`} alt={product.name} className="w-6 shadow-2" />
+                <Image src={`${contextPath}/demo/images/product/${product.image}`} alt={product.name}  width={250} preview />
+                    {/* <img src={`${contextPath}/demo/images/product/${product.image}`} alt={product.name} className="w-6 shadow-2" preview /> */}
                 </div>
                 <div>
-                    <h4 className="p-mb-1">{product.name}</h4>
-                    <h6 className="mt-0 mb-3">${product.price}</h6>
-                    <span className={`product-badge status-${product.inventoryStatus.toLowerCase()}`}>{product.inventoryStatus}</span>
-                    <div className="car-buttons mt-5">
+                    {/* <h4 className="p-mb-1">{product.name}</h4>
+                    <h6 className="mt-0 mb-3">${product.price}</h6> */}
+                    {/* <span className={`product-badge status-${product.inventoryStatus.toLowerCase()}`}>{product.inventoryStatus}</span> */}
+                    {/* <div className="car-buttons mt-5">
                         <Button type="button" className="p-button p-button-rounded mr-2" icon="pi pi-search"></Button>
                         <Button type="button" className="p-button-success p-button-rounded mr-2" icon="pi pi-star"></Button>
                         <Button type="button" className="p-button-help p-button-rounded" icon="pi pi-cog"></Button>
-                    </div>
+                    </div> */}
                 </div>
             </div>
         );
@@ -84,7 +87,7 @@ const MediaDemo = () => {
             <div className="col-12">
                 <div className="card">
                     <h5>Carousel</h5>
-                    <Carousel value={products} numVisible={3} numScroll={3} responsiveOptions={carouselResponsiveOptions} itemTemplate={carouselItemTemplate}></Carousel>
+                    <Carousel value={products} numVisible={1} numScroll={1} responsiveOptions={carouselResponsiveOptions} itemTemplate={carouselItemTemplate}></Carousel>
                 </div>
             </div>
 

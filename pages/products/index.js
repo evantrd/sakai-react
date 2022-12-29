@@ -19,19 +19,22 @@ import { InputNumber } from 'primereact/inputnumber';
 import { OverlayPanel } from 'primereact/overlaypanel';
 import { Fieldset } from 'primereact/fieldset';
 import { Dropdown } from 'primereact/dropdown';
-import ProductClasification from '../../components/inventory/ProductClasification.jsx'
-import ProductSection from '../../components/inventory/ProductSection.jsx'
-import ProductTray from '../../components/inventory/ProductTray.jsx'
+import ProductClasification from '../../components/inventory/ProductClasification.jsx';
+import ProductSection from '../../components/inventory/ProductSection.jsx';
+import ProductTray from '../../components/inventory/ProductTray.jsx';
 import ProductWarranty from '../../components/inventory/ProductWarranty.jsx';
 import CountryIva from '../../components/common/CountryIva.jsx';
+import { Image } from 'primereact/image';
+import { InputTextarea } from 'primereact/inputtextarea';
 
 const SignupSchema = Yup.object().shape({
     FirstName: Yup.string().min(2, 'Too Short!').max(50, 'Too Long!').required('Required'),
     LastName: Yup.string().min(2, 'Too Short!').max(50, 'Too Long!').required('Required'),
     Email: Yup.string().email('Invalid email').required('Required')
+    
 });
 
-const Crud = ({ querySuscriptions }) => {
+const Crud = ({ querySuscriptions, countryIvaResult, sectionResult ,  clasificationResult ,  trayResult,warrantyResult  }) => {
     let emptyPost = {
         Id: null,
         Active: true,
@@ -47,7 +50,7 @@ const Crud = ({ querySuscriptions }) => {
         Phone2: null
     };
 
-    let emptySuscription = []
+    let emptySuscription = [];
 
     const [posts, setPosts] = useState(null);
     const [postDialog, setPostDialog] = useState(false);
@@ -63,12 +66,21 @@ const Crud = ({ querySuscriptions }) => {
     const toast = useRef(null);
     const dt = useRef(null);
     const op = useRef(null);
-    const op2 = useRef(null);
+    let [price, setPrice] = useState(0);
+    let [iva, setIva] = useState(0);
+    let [total, setTotal] = useState(0);
+    const [dropdownIva, setDropdownIva] = useState(0);
+    const [dropdownIvas, setDropdownIvas] = useState(countryIvaResult);
+
     const contextPath = getConfig().publicRuntimeConfig.contextPath;
 
+
+
+    //  if (dropdownIva === undefined){setDropdownIvas(countryIvaResult[0].name)} ;
+    
     useEffect(() => {
         axios
-            .get('http://localhost:3000/api/member')
+            .get('http://localhost:3000/api/product')
             .then((res) => {
                 setPosts(res.data);
             })
@@ -78,8 +90,6 @@ const Crud = ({ querySuscriptions }) => {
     }, []);
 
 
-
-    let multiselectValues = suscriptions.filter((suscriptions) => suscriptions.id === -1);
 
     const formatCurrency = (value) => {
         return value?.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
@@ -105,93 +115,82 @@ const Crud = ({ querySuscriptions }) => {
         setDeletePostsDialog(false);
     };
 
-    const toggle = (event) => {
-        op.current.toggle(event);
-    };
-
-
-    const savePost = async ()  => {
+   
+    const savePost = async () => {
         setSubmitted(true);
 
         if (post.FirstName.trim() && post.Phone1.trim()) {
             let _posts = [...posts];
             let _post = { ...post };
-            let _multiselectValue = multiselectValue ;
-            let _suscriptions = suscriptions ;
-            let _suscription = [] ;
-            let responseId = 0 ;
+            let _multiselectValue = multiselectValue;
+            let _suscriptions = suscriptions;
+            let _suscription = [];
+            let responseId = 0;
             if (post.Id) {
                 const index = findIndexById(post.Id);
-                   let _post = { ...post };
+                let _post = { ...post };
                 _posts[index] = _post;
-                 responseId = _post.Id
+                responseId = _post.Id;
                 axios
-                    .put('http://localhost:3000/api/member', _post)
-                    .then(function  (response) {
+                    .put('http://localhost:3000/api/product', _post)
+                    .then(function (response) {
                         toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Actualizado con exito!', life: 3000 });
                     })
                     .catch(function (error) {
                         console.log(error);
                     });
-
-          
-          } else {
-                _post.Id = createId();             
+            } else {
+                _post.Id = createId();
                 _posts.push(_post);
-                await  axios.post('http://localhost:3000/api/member', _post)
+                await axios
+                    .post('http://localhost:3000/api/product', _post)
                     .then(function (response) {
                         toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Producto Creado con Exito', life: 3000 });
-                        responseId =   response.data.Id;
-                        _post.Id = responseId,
-                        _post[`${'Id'}`] = responseId;
-                      
-                       
+                        responseId = response.data.Id;
+                        (_post.Id = responseId), (_post[`${'Id'}`] = responseId);
                     })
                     .catch(function (error) {
                         console.log(error);
                     });
-
             }
-          
-        // console.log(responseId ,'ID ************** TOTAL',(_suscriptions.filter(e => e.id == responseId)).length )
 
-        // _suscriptions.filter(e => e.id == responseId)
+            // console.log(responseId ,'ID ************** TOTAL',(_suscriptions.filter(e => e.id == responseId)).length )
 
-           
-             
-     
-        _suscriptions.splice(_suscriptions.findIndex(e => e.id == responseId),(_suscriptions.filter(e => e.id == responseId)).length,);
+            // _suscriptions.filter(e => e.id == responseId)
+
+            _suscriptions.splice(
+                _suscriptions.findIndex((e) => e.id == responseId),
+                _suscriptions.filter((e) => e.id == responseId).length
+            );
 
             for (var i = 0; i < _multiselectValue.length; ++i) {
-              
-                   _multiselectValue[i].isSelected = responseId;
-                   _suscriptions.splice(1,0,{name:_multiselectValue[i].name,id:responseId,code:_multiselectValue[i].code})
-              
+                _multiselectValue[i].isSelected = responseId;
+                _suscriptions.splice(1, 0, { name: _multiselectValue[i].name, id: responseId, code: _multiselectValue[i].code });
             }
 
-           
             // console.log('********** _suscriptions',_suscriptions);
-            // console.log('********** suscriptions',_suscriptions);
+            // console.log('********** suscriptions',_suscriptions);wait
             // console.log('********** suscription',_suscription);
             // console.log('********** _multiselectValue',_multiselectValue);
-          
 
-            axios.delete('http://localhost:3000/api/suscription', {data:{Id: responseId}}).then(function (response) {
-                console.log(response.data);  
-                
-            })
-            .catch(function (error) {
-                console.log(error);
-            });
+            axios
+                .delete('http://localhost:3000/api/suscription', { data: { Id: responseId } })
+                .then(function (response) {
+                    console.log(response.data);
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
 
-            axios.post('http://localhost:3000/api/suscription', _multiselectValue)
-            .then(function (response) {
-                console.log(response);
-                toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Creado con Exito', life: 3000 });
-            })
-            .catch(function (error) {
-                console.log(error);
-            });
+            axios
+                .post('http://localhost:3000/api/suscription', _multiselectValue)
+                .then(function (response) {
+                    console.log(response);
+                    toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Creado con Exito', life: 3000 });
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
 
             setPosts(_posts);
             setSuscriptions(_suscriptions);
@@ -202,32 +201,38 @@ const Crud = ({ querySuscriptions }) => {
     };
 
     const editPost = (post) => {
-   
-        let _multiselectValues = suscriptions.filter((suscriptions) => suscriptions.id == post.Id);
-        let _suscriptions = suscriptions.filter((suscriptions) => suscriptions.id == -1);
+        // let _multiselectValues = suscriptions.filter((suscriptions) => suscriptions.id == post.Id);
+        // let _suscriptions = suscriptions.filter((suscriptions) => suscriptions.id == -1);
+
+        // if (_multiselectValues.length == 0) {
+        //     _suscriptions = [];
+        // }
+
+        // for (var i = 0; i < _multiselectValues.length; ++i) {
+        //     let codeNow = _multiselectValues[i]['code'];
+
+        //     for (var x = 0; x < _suscriptions.length; ++x) {
+        //         if (_suscriptions[x] !== undefined && _suscriptions[x]['code'] == codeNow) {
+        //             _suscriptions[x].isSelected = post.Id;
+        //         }
+        //     }
+        // }
+
+        // _multiselectValues = suscriptions.filter((_suscriptions) => _suscriptions.isSelected == post.Id);
+
+        // //   console.log(JSON.stringify(multiselectValues))
+        // //   console.log(suscriptions)
+        // setMultiselectValue(_multiselectValues);
 
 
-        if (_multiselectValues.length == 0) {
-            _suscriptions = [];
-        }
-
-        for (var i = 0; i < _multiselectValues.length; ++i) {
-            let codeNow = _multiselectValues[i]['code'];
-            
-            for (var x = 0; x < _suscriptions.length; ++x) {
-                if (_suscriptions[x] !== undefined && _suscriptions[x]['code'] == codeNow) {
-                    _suscriptions[x].isSelected = post.Id;
-                }
-            }
-        }
-
-        _multiselectValues = suscriptions.filter((_suscriptions) => _suscriptions.isSelected == post.Id );
-
-    //   console.log(JSON.stringify(multiselectValues))
-        //   console.log(suscriptions)
-          setMultiselectValue(_multiselectValues);
-
+        console.log('precio desde edit',post.Price)
+        console.log('Iva desde edit',post.Iva)
+        console.log('Total desde edit',post.Total)
         setPost({ ...post });
+        setIva(post.Iva);
+        setPrice(post.Price);
+        setTotal(post.Total)
+        setDropdownIva(post.Iva);       
         setPostDialog(true);
     };
 
@@ -237,29 +242,30 @@ const Crud = ({ querySuscriptions }) => {
     };
 
     const deletePost = () => {
- 
-        axios.delete('http://localhost:3000/api/member', {data :{Id:post.Id}})
-                    .then(function (response) {
-                        console.log(response);
-                        let _posts = posts.filter((val) => val.Id !== post.Id);
-            setPosts(_posts);
-            setDeletePostDialog(false);
-            setPost(emptyPost);
-            toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Miembreo Eliminado', life: 3000 });
-                    })
-                    .catch(function (error) {
-                        console.log(error);
-                    });
+        axios
+            .delete('http://localhost:3000/api/product', { data: { Id: post.Id } })
+            .then(function (response) {
+                console.log(response);
+                let _posts = posts.filter((val) => val.Id !== post.Id);
+                setPosts(_posts);
+                setDeletePostDialog(false);
+                setPost(emptyPost);
+                toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Miembreo Eliminado', life: 3000 });
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
 
-        axios.delete('http://localhost:3000/api/suscription', {data:{Id: post.Id}}).then(function (response) {
-            console.log(response);
+        axios
+            .delete('http://localhost:3000/api/suscription', { data: { Id: post.Id } })
+            .then(function (response) {
+                console.log(response);
 
-            toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Suscripcion Eliminada', life: 3000 });
-        })
-        .catch(function (error) {
-            console.log(error);
-        });
-
+                toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Suscripcion Eliminada', life: 3000 });
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
     };
 
     const findIndexById = (id) => {
@@ -299,19 +305,36 @@ const Crud = ({ querySuscriptions }) => {
         toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Posts Deleted', life: 3000 });
     };
 
-    const onSuscriptionChange = (e) => {
-        let _sucription = { ...e };
-        setMultiselectValue(_sucription.value);
-   
+    const itemTemplate = (option) => {
+        return (
+            <div className="flex align-items-center">
+                <span style={{ width: '18px', height: '12px' }} />
+                <span>{option.value}</span>
+            </div>
+        );
     };
+    
 
     const onInputChange = (e, name) => {
         const val = (e.target && e.target.value) || '';
         let _post = { ...post };
         _post[`${name}`] = val;
 
+        if (name === 'Price'){
+            setPrice(+e.target.value);
+        }
+        
+        if (name === 'Iva'){
+            setIva(e.target.value);
+        }
+
         setPost(_post);
     };
+
+    useEffect(() => {
+        setTotal(price + (price*iva));
+        // console.log(price, iva, total)
+      }, [price, iva, total]);
 
     const leftToolbarTemplate = () => {
         return (
@@ -334,56 +357,87 @@ const Crud = ({ querySuscriptions }) => {
     };
 
     const onInputNumberChange = (e, name) => {
+        // e.preventDefault();
         const val = e.value || 0;
         let _post = { ...post };
         _post[`${name}`] = val;
 
+        // console.log(name,val,'price',price,'target',e.target.value);
+        
+        if (name == 'Price' ){
+            setPrice(+e.target.value);
+            setTotal(+e.target.value+(+e.target.value*iva))
+          
+            _post[`${'Total'}`] = +e.target.value+(+e.target.value*iva);
+            // console.log('total desde el precio',+e.target.value+(+e.target.value*iva));
+            
+        }
+        
+        if (name == 'Iva'){
+            
+            setIva(+e.target.value);
+            setDropdownIva(e.target.value);
+            setTotal(+price+(+price*e.target.value))
+            _post[`${'Total'}`] = +price+(+price*e.target.value);
+            console.log('total desde el itbis',+price+(+price*e.target.value));
+        }
+ 
         setPost(_post);
     };
 
     const nameBodyTemplate = (rowData) => {
         return (
             <>
-                <span className="p-column-title">Nombre</span>
-                {rowData.FirstName + ' ' + rowData.LastName}
+                <span className="p-column-title">Descripcion</span>
+                {rowData.Description}
             </>
         );
     };
 
-    function formatPhoneNumber(phoneNumberString) {
-        var cleaned = ('' + phoneNumberString).replace(/\D/g, '');
-        var match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
-        if (match) {
-            return '' + match[1] + '-' + match[2] + '-' + match[3];
-        }
-        return null;
-    }
 
+    const costBodyTemplate = (rowData) => {
+        return (
+            <>
+                <span className="p-column-title">Costo</span>
+                {formatCurrency(+rowData.Cost)}
+            </>
+        );
+    };
     const priceBodyTemplate = (rowData) => {
         return (
             <>
-                <span className="p-column-title">Price</span>
-                {formatCurrency(rowData.price)}
+                <span className="p-column-title">Precio</span>
+                {formatCurrency(+rowData.Price)}
             </>
         );
     };
-
-    const phon2BodyTemplate = (rowData) => {
+    const ivaBodyTemplate = (rowData) => {
         return (
             <>
-                <span className="p-column-title">Tel. 2</span>
-                {formatPhoneNumber(rowData.Phone2)}
+                <span className="p-column-title">Iva</span>
+                {formatCurrency(rowData.Iva*rowData.Price)}
+            </>
+        );
+    };
+    const totalBodyTemplate = (rowData) => {
+        return (
+            <>
+                <span className="p-column-title">Total</span>
+                {formatCurrency(+rowData.Price+(+rowData.Iva*rowData.Price))}
             </>
         );
     };
 
-    const formatDate = (value) => {
-        return value.toLocaleDateString('en-US', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        });
+    const codeBodyTemplate = (rowData) => {
+        return (
+            <>
+                <span className="p-column-title">Codigo</span>
+                {rowData.Code}
+            </>
+        );
     };
+
+
 
     const statusBodyTemplate = (rowData) => {
         var estatus = 'activo';
@@ -399,15 +453,21 @@ const Crud = ({ querySuscriptions }) => {
         );
     };
 
+    const clasBodyTemplate = (rowData) => {
+  
+        return (
+            <>
+                <span className="p-column-title">Clasification</span>
+                <span className={`post-badge status-${rowData.ClasificationName.toLowerCase()}`}>{rowData.ClasificationName}</span>
+            </>
+        );
+    };
+
     const actionBodyTemplate = (rowData) => {
         return (
             <>
                 <Button icon="pi pi-pencil" className="p-button-rounded p-button-success mr-2" onClick={() => editPost(rowData)} />
                 <Button icon="pi pi-trash" className="p-button-rounded p-button-warning mr-2" onClick={() => confirmDeletePost(rowData)} />
-                <Button icon="pi pi-images"  className="p-button-rounded p-button-info "   onClick={toggle}  />
-                                <OverlayPanel ref={op} appendTo={typeof window !== 'undefined' ? document.body : null} showCloseIcon>
-                                    <img src={`${contextPath}/demo/images/nature/nature9.jpg`} alt="nature1" />
-                                </OverlayPanel>
 
             </>
         );
@@ -442,14 +502,6 @@ const Crud = ({ querySuscriptions }) => {
         </>
     );
 
-    const itemTemplate = (option) => {
-        return (
-            <div className="flex align-items-center">
-                <span style={{ width: '18px', height: '12px' }} />
-                <span>{option.name}</span>
-            </div>
-        );
-    };
 
     return (
         <div className="grid crud-demo">
@@ -465,197 +517,225 @@ const Crud = ({ querySuscriptions }) => {
                         }}
                         validationSchema={SignupSchema}
                         onSubmit={(values) => {
-                            // same shape as initial values
-                            console.log(values);
+
                         }}
                     >
-                        {({ errors, touched, validateField }) => (
-                            <Form id="product">
-                                                     </Form>
-                        )}
+                        {({ errors, touched, validateField }) => <Form id="product"></Form>}
                     </Formik>
-                                <DataTable
-                                    ref={dt}
-                                    value={posts}
-                                    selection={selectedPosts}
-                                    onSelectionChange={(e) => setSelectedPosts(e.value)}
-                                    dataKey="Id"
-                                    paginator
-                                    rows={50}
-                                    rowsPerPageOptions={[50,100, 300]}
-                                    className="datatable-responsive"
-                                    paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} posts"
-                                    globalFilter={globalFilter}
-                                    emptyMessage="Productos no encontrados."
-                                    header={header}
-                                    responsiveLayout="scroll"
-                                >
-                                    <Column selectionMode="multiple" headerStyle={{ width: '2rem' }}></Column>
-                                    <Column field="code" header="Codigo" body={phon2BodyTemplate} headerStyle={{ minWidth: '9rem' }} sortable></Column>
-                                    <Column field="Description" header="Descripcion" sortable body={nameBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column>
-                                    <Column field="Cost" header="Costo" body={priceBodyTemplate} sortable></Column>
-                                    <Column field="Price" header="Precio" body={priceBodyTemplate} sortable headerStyle={{ minWidth: '9rem' }}></Column>
-                                    <Column field="Iva" header="Itbis" body={priceBodyTemplate} sortable headerStyle={{ minWidth: '9rem' }}></Column>
-                                    <Column field="TotalPrice" header="Neto" body={priceBodyTemplate} sortable headerStyle={{ minWidth: '9rem' }}></Column>
-                                    <Column field="Suscriptions" header="Clasificacion"  body={statusBodyTemplate} headerStyle={{ minWidth: '9rem' }} sortable></Column>
-                                    <Column field="classificationId" header="Sub Clasificacion"  headerStyle={{ minWidth: '9rem' }} hidden={true} ></Column>
-                                    <Column field="Existence" header="Existencia" hidden={false} sortable></Column>
-                                    <Column field="Active" header="Estatus" body={statusBodyTemplate} sortable headerStyle={{ minWidth: '5rem' }} hidden={false}></Column>                                    
-                                    <Column field="SubclassificationId" header="Sub Clasificacion" headerStyle={{ minWidth: '9rem' }} hidden={true} ></Column>
-                                    <Column field="BarCode" header="Codigo Barra" headerStyle={{ minWidth: '9rem' }} hidden={true} ></Column>
-                                    <Column field="Section" header="Tramo" headerStyle={{ minWidth: '9rem' }} hidden={true} ></Column>
-                                    <Column field="Tray" header="Bandeja" headerStyle={{ minWidth: '9rem' }} hidden={true} ></Column>                                    
-                                    <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }} align="centered" ></Column>
-                                </DataTable>
+                    <DataTable
+                        ref={dt}
+                        value={posts}
+                        selection={selectedPosts}
+                        onSelectionChange={(e) => setSelectedPosts(e.value)}
+                        dataKey="Id"
+                        paginator
+                        rows={50}
+                        rowsPerPageOptions={[50, 100, 300]}
+                        className="datatable-responsive"
+                        paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} posts"
+                        globalFilter={globalFilter}
+                        emptyMessage="Productos no encontrados."
+                        header={header}
+                        responsiveLayout="scroll"
+                    >
+                        <Column selectionMode="multiple" headerStyle={{ width: '2rem' }}></Column>
+                        <Column field="Code" header="Codigo" body={codeBodyTemplate} headerStyle={{ minWidth: '9rem' }} sortable></Column>
+                        <Column field="Description" header="Descripcion" sortable body={nameBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column>
+                        <Column field="Cost" header="Costo" body={costBodyTemplate} sortable></Column>
+                        <Column field="Price" header="Precio" body={priceBodyTemplate} sortable headerStyle={{ minWidth: '9rem' }}></Column>
+                        <Column field="Iva" header="Itbis" body={ivaBodyTemplate} sortable headerStyle={{ minWidth: '9rem' }}></Column>
+                        <Column field="TotalPrice" header="Neto" body={totalBodyTemplate} sortable headerStyle={{ minWidth: '9rem' }}></Column>
+                        <Column field="ClasificationName" header="Clasificacion" body={clasBodyTemplate} headerStyle={{ minWidth: '9rem' }} sortable></Column>
+                        <Column field="classificationId" header="Sub Clasificacion" headerStyle={{ minWidth: '9rem' }} hidden={true}></Column>
+                        <Column field="Existence" header="Existencia" hidden={false} sortable></Column>
+                        <Column field="Active" header="Estatus" body={statusBodyTemplate} sortable headerStyle={{ minWidth: '5rem' }} hidden={false}></Column>
+                        <Column field="SubclassificationId" header="Sub Clasificacion" headerStyle={{ minWidth: '9rem' }} hidden={true}></Column>
+                        <Column field="BarCode" header="Codigo Barra" headerStyle={{ minWidth: '9rem' }} hidden={true}></Column>
+                        <Column field="Section" header="Tramo" headerStyle={{ minWidth: '9rem' }} hidden={true}></Column>
+                        <Column field="Tray" header="Bandeja" headerStyle={{ minWidth: '9rem' }} hidden={true}></Column>
+                        <Column field="UrlImage" header="Image"  hidden={true}></Column>
+                        <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }} align="centered"></Column>
+                    </DataTable>
 
-                                <Dialog form="member" visible={postDialog} style={{ width: '750px' }} header="Detalle Productos" modal className="p-fluid" footer={postDialogFooter} onHide={hideDialog}>
-                                    {/* {post.image && <img src={`${contextPath}/demo/images/post/${post.image}`} alt={post.image} width="150" className="mt-0 mx-auto mb-5 block shadow-2" />} */}
-                                   
-                                    <div className="formgrid grid">
-                                    <div className="field col">                                       
+                    <Dialog form="member" visible={postDialog} style={{ width: '750px' }} header="Detalle Productos" modal className="p-fluid" footer={postDialogFooter} onHide={hideDialog}>
+                        {/* {post.image && <img src={`${contextPath}/demo/images/post/${post.image}`} alt={post.image} width="150" className="mt-0 mx-auto mb-5 block shadow-2" />} */}
 
-                                        <div className="field col">
-                                        <label htmlFor="LastName">Codigo</label>
-                                        <InputText InputText id="FirstName" value={post.FirstName} onChange={(e) => onInputChange(e, 'FirstName')} required autoFocus className={classNames({ 'p-invalid': submitted && !post.FirstName })}/>
-                                        {submitted && !post.FirstName && <small className="p-invalid">Descripcion del  producto requerida.</small>}
-                                    </div>
-                                    <div className="field col">
-                                        <label htmlFor="LastName">Descripcion</label>
-                                        <InputText InputText id="FirstName" value={post.FirstName} onChange={(e) => onInputChange(e, 'FirstName')} required  className={classNames({ 'p-invalid': submitted && !post.FirstName })} />
-                                        {submitted && !post.FirstName && <small className="p-invalid">Descripcion del  producto requerida.</small>}
-                                    </div>
-                                    <div className="field col">
-                                        <label htmlFor="LastName">Clasificacion</label>
-                                    <ProductClasification
+                        <div className="formgrid grid">
+                            <div className="field col">
+                                <div className="field col">
+                                    <label htmlFor="Code">Codigo</label>
+                                    <InputText InputText id="Code" value={post.Code} onChange={(e) => onInputChange(e, 'Code')} required autoFocus className={classNames({ 'p-invalid': submitted && !post.Code })} />
+                                    {submitted && !post.Code && <small className="p-invalid">Codigo requerido.</small>}
+                                </div>
+                                <div className="field col">
+                                    <label htmlFor="Description">Descripcion</label>
+                                    <InputText InputText id="Description" value={post.Description} onChange={(e) => onInputChange(e, 'Description')} required className={classNames({ 'p-invalid': submitted && !post.Description })} />
+                                    {submitted && !post.Description && <small className="p-invalid">Descripcion del producto requerida.</small>}
+                                </div>
+                                <div className="field col">
+                                    <label htmlFor="LastName">Clasificacion</label>
+                                    <ProductClasification  value={post.ClasificationName} data={clasificationResult}/>
+                                </div>
+                            </div>
+                            <div className="flex justify-content-center">               
+                            {<Image src={`${contextPath}/demo/images/product/${post.image}`} alt={post.name}  width={250} className="mt-1 mx-auto mb-5 block shadow-2"  preview />}
+                            </div>
+                            {/* {<img src={`${contextPath}/demo/images/product/${post.UrlImage}`} alt={post.UrlImage} width="300" className="mt-1 mx-auto mb-5 block shadow-2" />} */}
+                        </div>
+                        <div className="formgrid grid">
+                            <div className="field col">
+                                <label htmlFor="Cost">Costo</label>
+                                <InputNumber id="Cost" value={post.Cost} onValueChange={(e) => onInputNumberChange(e, 'Cost')} mode="currency" currency="USD" locale="en-US" />
+                            </div>
+
+                            <div className="field col">
+                                <label htmlFor="Price">Precio</label>
+                                <InputNumber id="Price" value={post.Price} onValueChange={(e) => onInputNumberChange(e, 'Price')} mode="currency" currency="USD" locale="en-US" />
+                            </div>
+                            <div className="field col">
+                                <label htmlFor="Iva">Itbis</label>
+                                <Dropdown  value={post.Iva} onChange={(e) => onInputNumberChange(e, 'Iva')} options={countryIvaResult} optionLabel="value"
+             optionValue="value"
+                                       
+                                         // placeholder="Seleccionar Itbis"
+                                         //filter
+                                         display="chip"
+                                          itemTemplate={itemTemplate}
                                     />
-                                        </div>
-                                    </div>                                    
-    
-                                    {<img src={`${contextPath}/demo/images/product/gaming-set.jpg`} alt={post.image} width="300" className="mt-1 mx-auto mb-5 block shadow-2" />}
-                                    </div>
-                                    <div className="formgrid grid">
-                                    <div className="field col">
-                                <label htmlFor="cost">Costo</label>
-                                <InputNumber id="Cost" value={post.Cost} onValueChange={(e) => onInputNumberChange(e, 'price')} mode="currency" currency="USD" locale="en-US" />
-                            </div>
-
-                            <div className="field col">
-                                <label htmlFor="price">Precio</label>
-                                <InputNumber id="Price" value={post.Price} onValueChange={(e) => onInputNumberChange(e, 'price')} mode="currency" currency="USD" locale="en-US" />
-                            </div>
-                            <div className="field col">
-                                <label htmlFor="itbis">Itbis</label>
-                                <CountryIva/>
+                                {/* <CountryIva value={post.Iva} data={countryIvaResult} onValueChange={(e) => onInputNumberChange(e, 'Iva')} /> */}
                             </div>
                             <div className="field col">
                                 <label htmlFor="total">Total</label>
-                                <InputNumber id="Total" value={post.Total} onValueChange={(e) => onInputNumberChange(e, 'price')} mode="currency" currency="USD" locale="en-US" />
+                                <InputNumber id="Total" value={post.Total} onKeyDown={(e) => onInputNumberChange(e, 'Total')} mode="currency" currency="USD" locale="en-US"  disabled/>
                             </div>
-                            
-                                    </div>
+                        </div>
 
-               
-                           <Fieldset legend="Avanzado" toggleable>
-                    <div className="formgrid grid">
-                                        <div className="field col">
-                                            <label htmlFor="NoIdentification">Seccion</label>
+                        <Fieldset legend="Avanzado" toggleable>
+                            <div className="formgrid grid">
+                                <div className="field col">
+                                    <label htmlFor="NoIdentification">Seccion</label>
 
-                                            <ProductSection   />
-                                        </div>
-                                        <div className="field col">
-                                            <label htmlFor="NoIdentification">Bandeja</label>
-                                            {/* <Dropdown value={dropdownValue} onChange={(e) => setDropdownValue(e.value)} options={dropdownValues} optionLabel="name" placeholder="Select" /> */}
-                                            <ProductTray
-                                    />
-                                        </div>
-                                        <div className="field col">
-                                            <label htmlFor="BornDate">Codigo Barra</label>
+                                    <ProductSection value={post.SectionName} data={sectionResult}/>
+                                </div>
+                                <div className="field col">
+                                    <label htmlFor="NoIdentification">Bandeja</label>
+                                    {/* <Dropdown value={dropdownValue} onChange={(e) => setDropdownValue(e.value)} options={dropdownValues} optionLabel="name" placeholder="Select" /> */}
+                                    <ProductTray value={post.TrayName} data={trayResult}/>
+                                </div>
+                                <div className="field col">
+                                    <label htmlFor="BornDate">Codigo Barra</label>
 
-                                            <Calendar id="BornDate" mask="99/99/9999" slotChar="mm/dd/yyyy" value={post.BornDate} onChange={(e) => onInputChange(e, 'BornDate')} rows={3} cols={20} />
-                                        </div>
-                                    </div>
-                                    <div className="formgrid grid">
-                                        <div className="field col">
-                                            <label htmlFor="NoIdentification">Garantia</label>
+                                    <InputText id="BornDate"  value={post.BarCode} onChange={(e) => onInputChange(e, 'BornDate')} rows={3} cols={20} />
+                                </div>
+                                
+                            </div>
+                            <div className="formgrid grid">
+                            <div className="field col">
+                                    <label htmlFor="BornDate">Inf.</label>
+                                    <InputTextarea placeholder="Mas Informacion" autoResize id="BornDate"  value={post.LongDescription} onChange={(e) => onInputChange(e, 'LongDescripcion')} rows={3} cols={20} />
+                                    
+                                </div>
+                                <div className="field col">
+                                    <label htmlFor="NoIdentification">Garantia</label>
 
-                                            <ProductWarranty
-                                    />
-                                        </div>
-                                        <div className="field col">
-                                            <label htmlFor="NoIdentification">Existencia Almacen</label>
+                                    <ProductWarranty value={post.WarrantyCode} data={warrantyResult}/>
+                                </div>
 
-                                            <ToggleButton id="Active" htmlFor="Active" checked={post.Active} onChange={(e) => onInputChange(e, 'Active')} onLabel="Cliente Activo" offLabel="Cliente Inactivo" />
-                                        </div>
-                                        <div className="field col">
-                                            <label htmlFor="BornDate">Estatus</label>                        
-                                        <ToggleButton id="Active" htmlFor="Active" checked={post.Active} onChange={(e) => onInputChange(e, 'Active')} onLabel="Cliente Activo" offLabel="Cliente Inactivo" />
-                      
-                                        </div>
-                                    </div>
-                                   
+                                {/* <div className="field col">
+                                    <label htmlFor="NoIdentification">Existencia Almacen</label>
 
-                    </Fieldset>
+                                    <ToggleButton id="Active" htmlFor="Active" checked={post.Active} onChange={(e) => onInputChange(e, 'Active')} onLabel="Cliente Activo" offLabel="Cliente Inactivo" />
+                                </div> */}
+                                <div className="field col">
+                                    <label htmlFor="BornDate">Estatus</label>
+                                    <ToggleButton id="Active" htmlFor="Active" checked={post.Active} onChange={(e) => onInputChange(e, 'Active')} onLabel="Cliente Activo" offLabel="Cliente Inactivo" />
+                                </div>
+                            </div>
+                        </Fieldset>
+                    </Dialog>
 
-                                   
-                                  
-                                </Dialog>
+                    <Dialog visible={deletePostDialog} style={{ width: '450px' }} header="Confirm" modal footer={deletePostDialogFooter} onHide={hideDeletePostDialog}>
+                        <div className="flex align-items-center justify-content-center">
+                            <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
+                            {post && (
+                                <span>
+                                    ¿Estás segura de que quieres eliminar?<b>{post.FirsName}</b>?
+                                </span>
+                            )}
+                        </div>
+                    </Dialog>
 
-                                <Dialog visible={deletePostDialog} style={{ width: '450px' }} header="Confirm" modal footer={deletePostDialogFooter} onHide={hideDeletePostDialog}>
-                                    <div className="flex align-items-center justify-content-center">
-                                        <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
-                                        {post && (
-                                            <span>
-                                                ¿Estás segura de que quieres eliminar?<b>{post.FirsName}</b>?
-                                            </span>
-                                        )}
-                                    </div>
-                                </Dialog>
-
-                                <Dialog visible={deletePostsDialog} style={{ width: '450px' }} header="Confirm" modal footer={deletePostsDialogFooter} onHide={hideDeletePostsDialog}>
-                                    <div className="flex align-items-center justify-content-center">
-                                        <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
-                                        {post && <span>¿Estás segura de que quieres eliminar los Productos seleccionados?</span>}
-                                    </div>
-                                </Dialog>
-   
+                    <Dialog visible={deletePostsDialog} style={{ width: '450px' }} header="Confirm" modal footer={deletePostsDialogFooter} onHide={hideDeletePostsDialog}>
+                        <div className="flex align-items-center justify-content-center">
+                            <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
+                            {post && <span>¿Estás segura de que quieres eliminar los Productos seleccionados?</span>}
+                        </div>
+                    </Dialog>
                 </div>
             </div>
         </div>
     );
 };
 
-export async function getStaticProps() {
+export async function getServerSideProps() {
     // Call an external API endpoint to get posts.
     // You can use any data fetching library
-    const response = await axios.get('http://localhost:3000/api/suscription').catch(function (error) {
-        if (error.response) {
-            // La respuesta fue hecha y el servidor respondió con un código de estado
-            // que esta fuera del rango de 2xx
-            console.log(error.response.data);
-            console.log(error.response.status);
-            console.log(error.response.headers);
-        } else if (error.request) {
-            // La petición fue hecha pero no se recibió respuesta
-            // `error.request` es una instancia de XMLHttpRequest en el navegador y una instancia de
-            // http.ClientRequest en node.js
-            console.log(error.request);
-        } else {
-            // Algo paso al preparar la petición que lanzo un Error
-            console.log('Error', error.message);
+    let countryIvaResult = []
+    let sectionResult = []
+    let clasificationResult = []
+    let trayResult = []
+    let warrantyResult =[]
+    await axios.all([
+        await  axios.get('http://localhost:3000/api/countryIva'), 
+        await  axios.get('http://localhost:3000/api/productSection'),
+        await  axios.get('http://localhost:3000/api/productClasification'),
+        await  axios.get('http://localhost:3000/api/productTray'),
+        await  axios.get('http://localhost:3000/api/productWarranty')
+      ]).then(axios.spread((obj1, obj2,obj3, obj4, obj5) => {
+        // Both requests are now complete
+        countryIvaResult =   obj1.data;
+        sectionResult = obj2.data;
+        clasificationResult =obj3.data;
+        trayResult  = obj4.data;
+        warrantyResult  = obj5.data;
+
+      }))
+      return {
+        props: {
+            countryIvaResult,
+            sectionResult ,
+            clasificationResult ,
+            trayResult ,
+            warrantyResult
         }
-        console.log(error.config);
-    });
-    const querySuscriptions = await response.data;
-    //    console.log(suscriptions)
+    };
+
+
+    // const response = await axios.get('http://localhost:3000/api/countryIva')
+    // .catch(function (error) {
+    //     if (error.response) {
+    //         // La respuesta fue hecha y el servidor respondió con un código de estado
+    //         // que esta fuera del rango de 2xx
+    //         console.log(error.response.data);
+    //         console.log(error.response.status);
+    //         console.log(error.response.headers);
+    //     } else if (error.request) {
+    //         // La petición fue hecha pero no se recibió respuesta
+    //         // `error.request` es una instancia de XMLHttpRequest en el navegador y una instancia de
+    //         // http.ClientRequest en node.js
+    //         console.log(error.request);
+    //     } else {
+    //         // Algo paso al preparar la petición que lanzo un Error
+    //         console.log('Error', error.message);
+    //     }
+    //     console.log(error.config);
+    // });
+     
+    //    console.log(contryIvaResult)
 
     // By returning { props: { posts } }, the Blog component
     // will receive `posts` as a prop at build time
-    return {
-        props: {
-            querySuscriptions
-        }
-    };
 }
 
 export default Crud;

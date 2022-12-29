@@ -5,54 +5,52 @@ import React, { useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 import { Dropdown } from 'primereact/dropdown';
 
-const CountryIva = (queryResults) => {
-
-    const [post, setPos] = useState([]);
-    const [data, setData] = useState(queryResults);
-    const [multiselectValue, setMultiselectValue] = useState(null);
+const CountryIva = (props) => {
 
 
-console.log(data)
+    const [dropdownValue, setDropdownValue] = useState(props.value||'0.18');
+    const [dropdownValues, setDropdownValues] = useState(props.data);
 
-    useEffect(() => {
-        axios
-            .get('http://localhost:3000/api/countryIva')
-            .then((res) => {
-                setData(res.data);
-            })
-            .catch((err) => {
-                console.error(err);
-            });
-    },[]);
 
-// var models = [];
+
+     
+
+    //   useEffect  ( async()   =>  {
+    //     await  axios
+    //         .get('http://localhost:3000/api/countryIva')
+    //         .then((res) => {
+    //             setDropdownValues(res.data);
+    //             if (props.value === undefined){setDropdownValue(res.data[0].name)} ;
+              
+                
+    //         })
+    //         .catch((err) => {
+    //             console.error(err);
+    //         });
+    // },[]);
+
+
 const itemTemplate = (option) => {
     return (
         <div className="flex align-items-center">
             <span style={{ width: '18px', height: '12px' }} />
-            <span>{option.name}</span>
+            <span>{option.value}</span>
         </div>
     );
 };
 
-const onSuscriptionChange = (e) => {
-    let _sucription = { ...e };
-    setMultiselectValue(_sucription.value);
 
-};
 
 return (
         // <MenuProvider>
         <>
-             <Dropdown
-                                         value={multiselectValue}
-                                         onChange={(e) => onSuscriptionChange(e, post)}
-                                         options={data}
-                                        optionLabel="name"
-                                        placeholder="Seleccionar Suscripcion"
-                                        filter
-                                        display="chip"
-                                         itemTemplate={itemTemplate}
+             <Dropdown  value={dropdownValue} onChange={(e) => setDropdownValue(e.value)} options={dropdownValues} optionLabel="name"
+             optionValue="value"
+                                       
+                                         // placeholder="Seleccionar Itbis"
+                                         //filter
+                                         display="chip"
+                                          itemTemplate={itemTemplate}
                                     />
                                     </>
         // </MenuProvider>

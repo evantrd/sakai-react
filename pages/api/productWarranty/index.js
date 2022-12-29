@@ -10,7 +10,7 @@ case "GET": try {
   const query = {
     // give the query a unique name
     name: 'fetch-tray',
-    text: 'select    c."Id"::int8 as "Id",   c."Active"::bool as "Active",   "Description" as name, "Code" ,"CompanyId" from  iqsoft.product_warranty c where "CompanyId" = $1',
+    text: 'select    c."Id"::int8 as "Id",   c."Active"::bool as "Active",   "Description" as name, "Code","Code" as value ,"CompanyId" from  iqsoft.product_warranty c where "CompanyId" = $1',
     values: [CompanyId],
   }
    const res = await conn.query(query)

@@ -5,27 +5,14 @@ import React, { useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 import { Dropdown } from 'primereact/dropdown';
 
-const ProductSection = (queryResults) => {
+const ProductSection = (props) => {
 
-    const [post, setPos] = useState([]);
-    const [data, setData] = useState(queryResults);
-    const [multiselectValue, setMultiselectValue] = useState(null);
+    const [dropdownValue, setDropdownValue] = useState(props.value);
+    const [dropdownValues, setDropdownValues] = useState(props.data);
 
 
-console.log(data)
+    if (dropdownValue === undefined){setDropdownValue(dropdownValues[0].name)} ;
 
-    useEffect(() => {
-        axios
-            .get('http://localhost:3000/api/productSection')
-            .then((res) => {
-                setData(res.data);
-            })
-            .catch((err) => {
-                console.error(err);
-            });
-    },[]);
-
-// var models = [];
 const itemTemplate = (option) => {
     return (
         <div className="flex align-items-center">
@@ -35,25 +22,18 @@ const itemTemplate = (option) => {
     );
 };
 
-const onSuscriptionChange = (e) => {
-    let _sucription = { ...e };
-    setMultiselectValue(_sucription.value);
 
-};
 
 return (
         // <MenuProvider>
         <>
-             <Dropdown
-                                         value={multiselectValue}
-                                         onChange={(e) => onSuscriptionChange(e, post)}
-                                         options={data}
-                                        optionLabel="name"
-                                        placeholder="Seleccionar Suscripcion"
-                                        filter
-                                        display="chip"
-                                         itemTemplate={itemTemplate}
-                                    />
+       <Dropdown  value={dropdownValue} onChange={(e) => setDropdownValue(e.value)} options={dropdownValues} optionLabel="name" optionValue="name" 
+                                       
+                                       // placeholder="Seleccionar Itbis"
+                                       //filter
+                                       display="chip"
+                                        itemTemplate={itemTemplate}
+                                  />
                                     </>
         // </MenuProvider>
     );
